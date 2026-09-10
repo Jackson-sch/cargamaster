@@ -1,14 +1,32 @@
 "use client";
 
-import { Radio } from "lucide-react";
+import { Radio, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { SelectorSedeNavbar } from "@/components/navbar/selector-sede";
 import { BuscadorGlobalNavbar } from "@/components/navbar/buscador-global";
 import { PanelNotificacionesNavbar } from "@/components/navbar/panel-notificaciones";
 import { ModalReportarIncidencia } from "@/components/navbar/modal-reportar-incidencia";
 import { UserMenu } from "@/components/auth/user-menu";
 
+const RUTA_NOMBRES: Record<string, string> = {
+  "/": "Centro de Control",
+  "/despacho": "Despacho de Viajes",
+  "/tracking": "Monitoreo GPS",
+  "/flota": "Flota de Carga",
+  "/conductores": "Conductores MTC",
+  "/documentos": "Vencimientos & CITV",
+  "/combustible": "Control Combustible",
+  "/mantenimiento": "Taller Mecánico",
+  "/liquidaciones": "Liquidaciones",
+  "/rutas": "Rutas & Peajes",
+  "/clientes": "Directorio Clientes",
+  "/facturacion": "Facturación UBL 2.1",
+  "/configuracion": "Configuración",
+};
+
 export function AppHeader({ title, subtitle }: { title?: string; subtitle?: string }) {
+  const pathname = usePathname();
   const [time, setTime] = useState<string>("");
   const [date, setDate] = useState<string>("");
 
@@ -45,22 +63,21 @@ export function AppHeader({ title, subtitle }: { title?: string; subtitle?: stri
     return () => clearInterval(interval);
   }, []);
 
+  const moduloActual = RUTA_NOMBRES[pathname] || title || "Operaciones";
+
   return (
     <header className="h-16 shrink-0 bg-[#0E1524] border-b border-[#1F2937] px-4 sm:px-6 flex items-center justify-between gap-4 sticky top-0 z-30">
-      {/* Title / Section */}
-      <div className="min-w-0 pr-2 shrink-0">
-        <h1 className="text-sm sm:text-base font-bold text-white tracking-tight font-[family-name:var(--font-sora)] truncate">
-          {title || "Centro de Control Logístico"}
-        </h1>
-        {subtitle && (
-          <p className="text-[11px] sm:text-xs text-slate-400 font-medium truncate hidden sm:block">
-            {subtitle}
-          </p>
-        )}
+      {/* Ubicación / Breadcrumb compacto */}
+      <div className="flex items-center gap-2 text-xs shrink-0 min-w-0">
+        <span className="hidden sm:inline text-slate-500 font-medium">Módulo</span>
+        <ChevronRight className="h-3 w-3 text-slate-600 hidden sm:inline shrink-0" />
+        <span className="font-semibold text-slate-200 font-[family-name:var(--font-sora)] tracking-tight truncate max-w-[140px] sm:max-w-[190px]">
+          {moduloActual}
+        </span>
       </div>
 
       {/* Center / Global Search & Live Radio */}
-      <div className="hidden lg:flex items-center gap-3 shrink-0">
+      <div className="hidden md:flex items-center gap-3">
         <BuscadorGlobalNavbar />
 
         {/* Live GPS Feed pill */}

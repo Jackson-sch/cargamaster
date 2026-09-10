@@ -48,7 +48,23 @@ export function LayoutShell({ children, title, subtitle }: LayoutShellProps) {
         <AppHeader title={title} subtitle={subtitle} />
         <main className="flex-1 p-6 overflow-y-auto" suppressHydrationWarning>
           {tienePermiso ? (
-            children
+            <div className="space-y-6">
+              {(title || subtitle) && (
+                <div className="border-b border-[#1F2937]/70 pb-5">
+                  {title && (
+                    <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight font-[family-name:var(--font-sora)]">
+                      {title}
+                    </h1>
+                  )}
+                  {subtitle && (
+                    <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                      {subtitle}
+                    </p>
+                  )}
+                </div>
+              )}
+              {children}
+            </div>
           ) : (
             <AccesoRestringido
               rol={activeRole}
