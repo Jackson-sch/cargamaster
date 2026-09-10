@@ -11,10 +11,14 @@ import {
 } from "@/lib/db/schema";
 import {
   unidadSchema,
+  actualizarUnidadSchema,
   semirremolqueSchema,
+  actualizarSemirremolqueSchema,
   acoplamientoSchema,
   type UnidadInput,
+  type ActualizarUnidadInput,
   type SemirremolqueInput,
+  type ActualizarSemirremolqueInput,
   type AcoplamientoInput,
 } from "@/lib/validations/flota";
 import { eq, and, desc } from "drizzle-orm";
@@ -229,3 +233,192 @@ export async function desacoplarTractoCarretaAction(asignacionId: string) {
     return { success: false, error: "No se pudo desacoplar la unidad." };
   }
 }
+
+export async function actualizarUnidadAction(data: ActualizarUnidadInput) {
+  try {
+    const parsed = actualizarUnidadSchema.parse(data);
+    const empresaId = await getEmpresaId();
+
+    const [actualizada] = await db
+      .update(unidades)
+      .set({
+        placa: parsed.placa,
+        tipoUnidad: parsed.tipoUnidad,
+        marca: parsed.marca,
+        modelo: parsed.modelo,
+        anioFabricacion: parsed.anioFabricacion,
+        color: parsed.color,
+        vinChasis: parsed.vinChasis,
+        numeroMotor: parsed.numeroMotor,
+        ejes: parsed.ejes,
+        capacidadArrastreTn: parsed.capacidadArrastreTn,
+        pesoSecoTn: parsed.pesoSecoTn,
+        tipoCombustible: parsed.tipoCombustible,
+        odometroActualKm: parsed.odometroActualKm,
+        idDispositivoGps: parsed.idDispositivoGps,
+        sedeId: parsed.sedeId,
+        estado: parsed.estado,
+        activo: parsed.activo,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(unidades.id, parsed.id), eq(unidades.empresaId, empresaId)))
+      .returning();
+
+    if (!actualizada) {
+      return { success: false, error: "Unidad no encontrada o sin permisos." };
+    }
+
+    revalidatePath("/flota");
+    revalidatePath("/");
+    return { success: true, unidad: actualizada };
+  } catch (error: any) {
+    console.error("Error al actualizar unidad:", error);
+    return {
+      success: false,
+      error: error?.message || "No se pudo actualizar la unidad vehicular.",
+    };
+  }
+}
+
+export async function cambiarEstadoUnidadAction(
+  id: string,
+  estado: "disponible" | "en_ruta" | "mantenimiento" | "inactivo"
+) {
+  try {
+    const empresaId = await getEmpresaId();
+
+    const [actualizada] = await db
+      .update(unidades)
+      .set({ estado, updatedAt: new Date() })
+      .where(and(eq(unidades.id, id), eq(unidades.empresaId, empresaId)))
+      .returning();
+
+    revalidatePath("/flota");
+    revalidatePath("/");
+    return { success: true, unidad: actualizada };
+  } catch (error: any) {
+    console.error("Error al cambiar estado de unidad:", error);
+    return { success: false, error: "No se pudo cambiar el estado de la unidad." };
+  }
+}
+
+export async function darDeBajaUnidadAction(id: string) {
+  try {
+    const empresaId = await getEmpresaId();
+
+    // Desacoplar si tenía carreta activa
+    await db
+      .update(asignacionesTractoCarreta)
+      .set({ activo: false, fechaDesacople: new Date() })
+      .where(
+        and(
+          eq(asignacionesTractoCarreta.empresaId, empresaId),
+          eq(asignacionesTractoCarreta.unidadId, id),
+          eq(asignacionesTractoCarreta.activo, true)
+        )
+      );
+
+    const [actualizada] = await db
+      .update(unidades)
+      .set({ activo: false, estado: "inactivo", updatedAt: new Date() })
+      .where(and(eq(unidades.id, id), eq(unidades.empresaId, empresaId)))
+      .returning();
+
+    revalidatePath("/flota");
+    revalidatePath("/");
+    return { success: true, unidad: actualizada };
+  } catch (error: any) {
+    console.error("Error al dar de baja unidad:", error);
+    return { success: false, error: "No se pudo dar de baja la unidad." };
+  }
+}
+
+export async function actualizarSemirremolqueAction(data: ActualizarSemirremolqueInput) {
+  try {
+    const parsed = actualizarSemirremolqueSchema.parse(data);
+    const empresaId = await getEmpresaId();
+
+    const [actualizado] = await db
+      .update(semirremolques)
+      .set({
+        placa: parsed.placa,
+        tipoCarroceria: parsed.tipoCarroceria,
+        marca: parsed.marca,
+        anioFabricacion: parsed.anioFabricacion,
+        ejes: parsed.ejes,
+        pesoNetoTn: parsed.pesoNetoTn,
+        cargaUtilMaxTn: parsed.cargaUtilMaxTn,
+        volumenM3: parsed.volumenM3,
+        estado: parsed.estado,
+        activo: parsed.activo,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(semirremolques.id, parsed.id), eq(semirremolques.empresaId, empresaId)))
+      .returning();
+
+    if (!actualizado) {
+      return { success: false, error: "Semirremolque no encontrado o sin permisos." };
+    }
+
+    revalidatePath("/flota");
+    return { success: true, semirremolque: actualizado };
+  } catch (error: any) {
+    console.error("Error al actualizar semirremolque:", error);
+    return {
+      success: false,
+      error: error?.message || "No se pudo actualizar el semirremolque.",
+    };
+  }
+}
+
+export async function cambiarEstadoSemirremolqueAction(
+  id: string,
+  estado: "disponible" | "acoplado" | "mantenimiento" | "inactivo"
+) {
+  try {
+    const empresaId = await getEmpresaId();
+
+    const [actualizado] = await db
+      .update(semirremolques)
+      .set({ estado, updatedAt: new Date() })
+      .where(and(eq(semirremolques.id, id), eq(semirremolques.empresaId, empresaId)))
+      .returning();
+
+    revalidatePath("/flota");
+    return { success: true, semirremolque: actualizado };
+  } catch (error: any) {
+    console.error("Error al cambiar estado de semirremolque:", error);
+    return { success: false, error: "No se pudo cambiar el estado del semirremolque." };
+  }
+}
+
+export async function darDeBajaSemirremolqueAction(id: string) {
+  try {
+    const empresaId = await getEmpresaId();
+
+    // Desacoplar si estaba acoplado
+    await db
+      .update(asignacionesTractoCarreta)
+      .set({ activo: false, fechaDesacople: new Date() })
+      .where(
+        and(
+          eq(asignacionesTractoCarreta.empresaId, empresaId),
+          eq(asignacionesTractoCarreta.semirremolqueId, id),
+          eq(asignacionesTractoCarreta.activo, true)
+        )
+      );
+
+    const [actualizado] = await db
+      .update(semirremolques)
+      .set({ activo: false, estado: "inactivo", updatedAt: new Date() })
+      .where(and(eq(semirremolques.id, id), eq(semirremolques.empresaId, empresaId)))
+      .returning();
+
+    revalidatePath("/flota");
+    return { success: true, semirremolque: actualizado };
+  } catch (error: any) {
+    console.error("Error al dar de baja semirremolque:", error);
+    return { success: false, error: "No se pudo dar de baja el semirremolque." };
+  }
+}
+
