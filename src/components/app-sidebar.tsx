@@ -133,7 +133,10 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 shrink-0 bg-[#111827] border-r border-[#1F2937] flex flex-col h-screen sticky top-0">
+    <aside
+      suppressHydrationWarning
+      className="w-64 shrink-0 bg-[#111827] border-r border-[#1F2937] flex flex-col h-screen sticky top-0"
+    >
       {/* Brand Header */}
       <div className="h-16 flex items-center gap-3 px-5 border-b border-[#1F2937] bg-[#0E1524]">
         <div className="h-9 w-9 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm shadow-amber-500/10">
@@ -245,12 +248,18 @@ export function AppSidebar() {
       </div>
 
       {/* User Footer */}
-      <div className="p-3 border-t border-[#1F2937] bg-[#0E1524] flex items-center justify-between">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-amber-400 shrink-0">
-            CM
+      <div
+        suppressHydrationWarning
+        className="p-3 border-t border-[#1F2937] bg-[#0E1524] flex items-center justify-between"
+      >
+        <div suppressHydrationWarning className="flex items-center gap-2.5 min-w-0">
+          <div
+            suppressHydrationWarning
+            className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-amber-400 shrink-0"
+          >
+            {"CM"}
           </div>
-          <div className="min-w-0 truncate">
+          <div suppressHydrationWarning className="min-w-0 truncate">
             <p className="text-xs font-medium text-slate-200 truncate">
               Carlos Mendoza
             </p>

@@ -9,11 +9,11 @@ interface LayoutShellProps {
 
 export function LayoutShell({ children, title, subtitle }: LayoutShellProps) {
   return (
-    <div className="flex min-h-screen bg-[#0B1220]">
+    <div className="flex min-h-screen bg-[#0B1220]" suppressHydrationWarning>
       <AppSidebar />
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0" suppressHydrationWarning>
         <AppHeader title={title} subtitle={subtitle} />
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-6 overflow-y-auto" suppressHydrationWarning>
           {children}
         </main>
       </div>
