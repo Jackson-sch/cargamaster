@@ -12,7 +12,9 @@ import {
 } from "@/lib/db/schema";
 import {
   crearConsumoCombustibleSchema,
+  actualizarConsumoCombustibleSchema,
   type CrearConsumoCombustibleInput,
+  type ActualizarConsumoCombustibleInput,
 } from "@/lib/validations/combustible";
 import { eq, and, desc, inArray } from "drizzle-orm";
 
@@ -234,3 +236,121 @@ export async function registrarConsumoCombustibleAction(data: CrearConsumoCombus
     };
   }
 }
+
+export async function actualizarConsumoCombustibleAction(data: ActualizarConsumoCombustibleInput) {
+  try {
+    const empresaId = await getEmpresaId();
+
+    const parsed = actualizarConsumoCombustibleSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.issues[0]?.message || "Datos del vale inválidos.",
+      };
+    }
+
+    const {
+      id,
+      grifoNombre,
+      grifoRuc,
+      numeroValeComprobante,
+      galonesCargados,
+      precioPorGalon,
+      totalMonto,
+      odometroAlCargar,
+      fotoTicketUrl,
+    } = parsed.data;
+
+    const consumoExistente = await db.query.consumoCombustible.findFirst({
+      where: and(eq(consumoCombustible.id, id), eq(consumoCombustible.empresaId, empresaId)),
+    });
+
+    if (!consumoExistente) {
+      return {
+        success: false,
+        error: "El vale de combustible no existe.",
+      };
+    }
+
+    // Calcular rendimiento si la unidad tiene odómetro previo
+    const unidadExistente = await db.query.unidades.findFirst({
+      where: eq(unidades.id, consumoExistente.unidadId),
+    });
+
+    let rendimientoCalculado = consumoExistente.rendimientoKmGalonCalculado;
+    if (unidadExistente && odometroAlCargar > 0) {
+      const odometroBase = (unidadExistente.odometroActualKm || 0) > odometroAlCargar
+        ? 0
+        : unidadExistente.odometroActualKm || 0;
+      if (odometroAlCargar > odometroBase && odometroBase > 0) {
+        const deltaKm = odometroAlCargar - odometroBase;
+        rendimientoCalculado = (deltaKm / galonesCargados).toFixed(2);
+      }
+    }
+
+    const [actualizado] = await db
+      .update(consumoCombustible)
+      .set({
+        grifoNombre: grifoNombre.trim(),
+        grifoRuc: grifoRuc && grifoRuc.trim() !== "" ? grifoRuc.trim() : null,
+        numeroValeComprobante: numeroValeComprobante.trim().toUpperCase(),
+        galonesCargados: galonesCargados.toFixed(2),
+        precioPorGalon: precioPorGalon.toFixed(2),
+        totalMonto: totalMonto.toFixed(2),
+        odometroAlCargar,
+        rendimientoKmGalonCalculado: rendimientoCalculado,
+        fotoTicketUrl: fotoTicketUrl && fotoTicketUrl.trim() !== "" ? fotoTicketUrl.trim() : null,
+      })
+      .where(and(eq(consumoCombustible.id, id), eq(consumoCombustible.empresaId, empresaId)))
+      .returning();
+
+    revalidatePath("/combustible");
+    revalidatePath("/flota");
+    return {
+      success: true,
+      message: "Vale de combustible actualizado con éxito.",
+      consumo: actualizado,
+    };
+  } catch (error) {
+    console.error("Error al actualizar consumo de combustible:", error);
+    return {
+      success: false,
+      error: "Ocurrió un error al actualizar el vale de combustible.",
+    };
+  }
+}
+
+export async function eliminarConsumoCombustibleAction(id: string) {
+  try {
+    const empresaId = await getEmpresaId();
+
+    const consumoExistente = await db.query.consumoCombustible.findFirst({
+      where: and(eq(consumoCombustible.id, id), eq(consumoCombustible.empresaId, empresaId)),
+    });
+
+    if (!consumoExistente) {
+      return {
+        success: false,
+        error: "El vale de combustible no existe o ya fue eliminado.",
+      };
+    }
+
+    await db
+      .delete(consumoCombustible)
+      .where(and(eq(consumoCombustible.id, id), eq(consumoCombustible.empresaId, empresaId)));
+
+    revalidatePath("/combustible");
+    revalidatePath("/flota");
+    return {
+      success: true,
+      message: "Vale de combustible eliminado con éxito.",
+    };
+  } catch (error) {
+    console.error("Error al eliminar consumo de combustible:", error);
+    return {
+      success: false,
+      error: "Ocurrió un error al eliminar el vale de combustible.",
+    };
+  }
+}
+
