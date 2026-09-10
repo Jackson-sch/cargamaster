@@ -19,3 +19,9 @@ export const clienteSchema = z.object({
 });
 
 export type ClienteInput = z.infer<typeof clienteSchema>;
+
+export const actualizarClienteSchema = clienteSchema.extend({
+  id: z.string().uuid("ID de cliente inválido"),
+});
+
+export type ActualizarClienteInput = z.infer<typeof actualizarClienteSchema>;

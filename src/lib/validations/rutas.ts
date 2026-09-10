@@ -20,7 +20,13 @@ export const rutaSchema = z.object({
   distanciaEstimadaKm: z.coerce.string().min(1, "Ingresa la distancia estimada en km"),
   tiempoEstimadoHoras: z.coerce.string().min(1, "Ingresa el tiempo estimado de tránsito"),
   peajesEstimadosMonto: z.coerce.string().default("0"),
-  galonesEstimados: z.coerce.string().optional(),
+  galonesEstimados: z.coerce.string().optional().nullable(),
+});
+
+export const actualizarRutaSchema = rutaSchema.extend({
+  id: z.string().uuid("ID de ruta inválido"),
+  activo: z.boolean().optional(),
 });
 
 export type RutaInput = z.infer<typeof rutaSchema>;
+export type ActualizarRutaInput = z.infer<typeof actualizarRutaSchema>;
