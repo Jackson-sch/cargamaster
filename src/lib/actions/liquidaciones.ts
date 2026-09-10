@@ -11,7 +11,11 @@ import {
 } from "@/lib/db/schema";
 import {
   crearLiquidacionSchema,
+  actualizarLiquidacionSchema,
+  cambiarEstadoLiquidacionSchema,
   type CrearLiquidacionInput,
+  type ActualizarLiquidacionInput,
+  type CambiarEstadoLiquidacionInput,
 } from "@/lib/validations/liquidaciones";
 import { eq, and, desc } from "drizzle-orm";
 
@@ -114,17 +118,102 @@ export async function crearLiquidacionViajeAction(data: CrearLiquidacionInput) {
   }
 }
 
-export async function pagarLiquidacionAction(liquidacionId: string) {
+export async function actualizarLiquidacionAction(data: ActualizarLiquidacionInput) {
   try {
-    await db
+    const parsed = actualizarLiquidacionSchema.parse(data);
+    const empresaId = await getEmpresaId();
+
+    const liqExistente = await db.query.liquidacionesConductor.findFirst({
+      where: and(eq(liquidacionesConductor.id, parsed.id), eq(liquidacionesConductor.empresaId, empresaId)),
+    });
+
+    if (!liqExistente) {
+      return { success: false, error: "La liquidación no existe o no pertenece a la empresa." };
+    }
+
+    const [actualizada] = await db
       .update(liquidacionesConductor)
-      .set({ estado: "pagado" })
-      .where(eq(liquidacionesConductor.id, liquidacionId));
+      .set({
+        bonoPuntualidad: parsed.bonoPuntualidad.toFixed(2),
+        gastosPeajesDeclarados: parsed.gastosPeajesDeclarados.toFixed(2),
+        gastosCocheraDeclarados: parsed.gastosCocheraDeclarados.toFixed(2),
+        otrosGastos: parsed.otrosGastos.toFixed(2),
+        saldoAFavorConductor: parsed.saldoAFavorConductor.toFixed(2),
+        saldoAFavorEmpresa: parsed.saldoAFavorEmpresa.toFixed(2),
+        observaciones: parsed.observaciones || null,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(liquidacionesConductor.id, parsed.id), eq(liquidacionesConductor.empresaId, empresaId)))
+      .returning();
 
     revalidatePath("/liquidaciones");
-    return { success: true };
+    return { success: true, liquidacion: actualizada };
   } catch (error: any) {
-    console.error("Error al pagar liquidación:", error);
-    return { success: false, error: error.message || "Error al actualizar pago." };
+    console.error("Error al actualizar liquidación:", error);
+    return { success: false, error: error.message || "Error al actualizar gastos de liquidación." };
   }
 }
+
+export async function cambiarEstadoLiquidacionAction(data: CambiarEstadoLiquidacionInput) {
+  try {
+    const parsed = cambiarEstadoLiquidacionSchema.parse(data);
+    const empresaId = await getEmpresaId();
+
+    const [actualizada] = await db
+      .update(liquidacionesConductor)
+      .set({
+        estado: parsed.estado,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(liquidacionesConductor.id, parsed.id), eq(liquidacionesConductor.empresaId, empresaId)))
+      .returning();
+
+    if (!actualizada) {
+      return { success: false, error: "Liquidación no encontrada." };
+    }
+
+    revalidatePath("/liquidaciones");
+    return { success: true, liquidacion: actualizada };
+  } catch (error: any) {
+    console.error("Error al cambiar estado de liquidación:", error);
+    return { success: false, error: error.message || "Error al cambiar estado." };
+  }
+}
+
+export async function pagarLiquidacionAction(liquidacionId: string) {
+  return cambiarEstadoLiquidacionAction({ id: liquidacionId, estado: "pagado" });
+}
+
+export async function eliminarLiquidacionAction(liquidacionId: string) {
+  try {
+    const empresaId = await getEmpresaId();
+
+    const liqExistente = await db.query.liquidacionesConductor.findFirst({
+      where: and(eq(liquidacionesConductor.id, liquidacionId), eq(liquidacionesConductor.empresaId, empresaId)),
+    });
+
+    if (!liqExistente) {
+      return { success: false, error: "La liquidación no existe o ya fue eliminada." };
+    }
+
+    // Revertir estado de la orden de servicio a 'entregado'
+    if (liqExistente.ordenServicioId) {
+      await db
+        .update(ordenesServicio)
+        .set({ estado: "entregado" })
+        .where(eq(ordenesServicio.id, liqExistente.ordenServicioId));
+    }
+
+    await db
+      .delete(liquidacionesConductor)
+      .where(and(eq(liquidacionesConductor.id, liquidacionId), eq(liquidacionesConductor.empresaId, empresaId)));
+
+    revalidatePath("/liquidaciones");
+    revalidatePath("/despacho");
+    return { success: true, message: "Liquidación eliminada y orden de servicio revertida a 'entregado'." };
+  } catch (error: any) {
+    console.error("Error al eliminar liquidación:", error);
+    return { success: false, error: error.message || "Error al eliminar la liquidación." };
+  }
+}
+
