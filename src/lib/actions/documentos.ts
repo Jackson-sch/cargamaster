@@ -14,7 +14,7 @@ import {
   type DocumentoVehiculoInput,
 } from "@/lib/validations/documentos";
 import { calcularEstadoAlerta } from "@/lib/utils/fechas";
-import { eq, desc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
 async function getEmpresaId(): Promise<string> {
   const empresa = await db.query.empresas.findFirst({
@@ -128,6 +128,109 @@ export async function registrarDocumentoVehiculoAction(data: DocumentoVehiculoIn
     return {
       success: false,
       error: error?.message || "No se pudo registrar el documento.",
+    };
+  }
+}
+
+export async function renovarDocumentoVehiculoAction(data: {
+  id: string;
+  numeroDocumento: string;
+  fechaEmision: string;
+  fechaVencimiento: string;
+  empresaEmisora?: string;
+  archivoAdjuntoUrl?: string;
+}) {
+  try {
+    const empresaId = await getEmpresaId();
+    const { estado, diasRestantes } = calcularEstadoAlerta(data.fechaVencimiento);
+
+    const docExistente = await db.query.documentosVehiculo.findFirst({
+      where: and(
+        eq(documentosVehiculo.id, data.id),
+        eq(documentosVehiculo.empresaId, empresaId)
+      ),
+    });
+
+    if (!docExistente) {
+      return { success: false, error: "Documento no encontrado." };
+    }
+
+    await db
+      .update(documentosVehiculo)
+      .set({
+        numeroDocumento: data.numeroDocumento.trim(),
+        fechaEmision: data.fechaEmision,
+        fechaVencimiento: data.fechaVencimiento,
+        empresaEmisora: data.empresaEmisora?.trim() || docExistente.empresaEmisora,
+        archivoAdjuntoUrl: data.archivoAdjuntoUrl || docExistente.archivoAdjuntoUrl,
+        estadoAlerta: estado,
+        updatedAt: new Date(),
+      })
+      .where(eq(documentosVehiculo.id, data.id));
+
+    // Si había alertas previas sin resolver para este documento/referencia y ahora está vigente (>30 días), resolverlas
+    if (diasRestantes > 30) {
+      await db
+        .update(alertasSistema)
+        .set({ resuelta: true, resueltaEn: new Date() })
+        .where(
+          and(
+            eq(alertasSistema.referenciaId, docExistente.entidadId),
+            eq(alertasSistema.categoria, "vencimiento_documento"),
+            eq(alertasSistema.resuelta, false)
+          )
+        );
+    }
+
+    revalidatePath("/documentos");
+    revalidatePath("/flota");
+    revalidatePath("/");
+
+    return {
+      success: true,
+      message: `Documento renovado exitosamente. Nueva vigencia hasta el ${data.fechaVencimiento}.`,
+    };
+  } catch (error: any) {
+    console.error("Error al renovar documento:", error);
+    return {
+      success: false,
+      error: error?.message || "Error al renovar documento.",
+    };
+  }
+}
+
+export async function eliminarDocumentoVehiculoAction(id: string) {
+  try {
+    const empresaId = await getEmpresaId();
+
+    const doc = await db.query.documentosVehiculo.findFirst({
+      where: and(
+        eq(documentosVehiculo.id, id),
+        eq(documentosVehiculo.empresaId, empresaId)
+      ),
+    });
+
+    if (!doc) {
+      return { success: false, error: "Documento no encontrado." };
+    }
+
+    await db
+      .delete(documentosVehiculo)
+      .where(eq(documentosVehiculo.id, id));
+
+    revalidatePath("/documentos");
+    revalidatePath("/flota");
+    revalidatePath("/");
+
+    return {
+      success: true,
+      message: `Documento ${doc.tipoDocumento.replace(/_/g, " ").toUpperCase()} eliminado correctamente.`,
+    };
+  } catch (error: any) {
+    console.error("Error al eliminar documento:", error);
+    return {
+      success: false,
+      error: error?.message || "Error al eliminar documento.",
     };
   }
 }

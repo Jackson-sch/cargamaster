@@ -1,7 +1,11 @@
 "use client";
 
-import { Bell, ShieldAlert, Search, Building, RefreshCw, Radio } from "lucide-react";
+import { Radio } from "lucide-react";
 import { useState, useEffect } from "react";
+import { SelectorSedeNavbar } from "@/components/navbar/selector-sede";
+import { BuscadorGlobalNavbar } from "@/components/navbar/buscador-global";
+import { PanelNotificacionesNavbar } from "@/components/navbar/panel-notificaciones";
+import { ModalReportarIncidencia } from "@/components/navbar/modal-reportar-incidencia";
 
 export function AppHeader({ title, subtitle }: { title?: string; subtitle?: string }) {
   const [time, setTime] = useState<string>("");
@@ -24,65 +28,48 @@ export function AppHeader({ title, subtitle }: { title?: string; subtitle?: stri
   }, []);
 
   return (
-    <header className="h-16 shrink-0 bg-[#0E1524] border-b border-[#1F2937] px-6 flex items-center justify-between sticky top-0 z-30">
+    <header className="h-16 shrink-0 bg-[#0E1524] border-b border-[#1F2937] px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
       {/* Title / Section */}
-      <div>
-        <h1 className="text-base font-bold text-white tracking-tight font-[family-name:var(--font-sora)]">
+      <div className="min-w-0 pr-2">
+        <h1 className="text-sm sm:text-base font-bold text-white tracking-tight font-[family-name:var(--font-sora)] truncate">
           {title || "Centro de Control Logístico"}
         </h1>
         {subtitle && (
-          <p className="text-xs text-slate-400 font-medium">{subtitle}</p>
+          <p className="text-[11px] sm:text-xs text-slate-400 font-medium truncate hidden sm:block">
+            {subtitle}
+          </p>
         )}
       </div>
 
-      {/* Center / Search & Live Radio */}
+      {/* Center / Global Search & Live Radio */}
       <div className="hidden md:flex items-center gap-3">
-        <div className="relative">
-          <Search className="h-3.5 w-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            placeholder="Buscar placa, chofer, guía o viaje (OS)..."
-            className="w-80 h-9 bg-[#111827] border border-[#1F2937] rounded-md pl-9 pr-3 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-amber-500 transition-colors"
-          />
-        </div>
+        <BuscadorGlobalNavbar />
 
         {/* Live GPS Feed pill */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium">
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-medium shrink-0">
           <Radio className="h-3 w-3 animate-pulse text-emerald-400" />
-          <span className="text-[11px] font-semibold tracking-wide uppercase">GPS Activo</span>
+          <span className="text-[11px] font-semibold tracking-wide uppercase">SUTRAN GPS</span>
         </div>
       </div>
 
       {/* Right Controls */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         {/* Peruvian Official Clock */}
-        <div className="hidden sm:flex flex-col text-right font-mono text-xs text-slate-400">
-          <span className="text-[11px] text-slate-500 uppercase font-sans font-semibold">Hora Perú (PET)</span>
+        <div className="hidden xl:flex flex-col text-right font-mono text-xs text-slate-400">
+          <span className="text-[10px] text-slate-500 uppercase font-sans font-semibold">Hora Oficial (PET)</span>
           <span className="font-bold text-slate-200" suppressHydrationWarning>{time || "00:00:00"}</span>
         </div>
 
-        <div className="h-6 w-[1px] bg-[#1F2937] hidden sm:block" />
+        <div className="h-6 w-[1px] bg-[#1F2937] hidden xl:block" />
 
-        {/* Sede selector */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[#111827] border border-[#1F2937] text-xs text-slate-300">
-          <Building className="h-3.5 w-3.5 text-amber-400" />
-          <span className="font-medium">Callao (Principal)</span>
-        </div>
+        {/* Sede selector funcional */}
+        <SelectorSedeNavbar />
 
-        {/* Alertas Bell */}
-        <button
-          title="Ver alertas de vencimiento"
-          className="relative h-9 w-9 rounded-md bg-[#111827] border border-[#1F2937] flex items-center justify-center text-slate-300 hover:text-white hover:border-slate-700 transition-colors"
-        >
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-amber-500 ring-2 ring-[#0E1524]" />
-        </button>
+        {/* Alertas y Notificaciones en Vivo */}
+        <PanelNotificacionesNavbar />
 
-        {/* SOS / Incidencia Button */}
-        <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition-colors">
-          <ShieldAlert className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Reportar Incidencia</span>
-        </button>
+        {/* SOS / Reportar Incidencia Operativa */}
+        <ModalReportarIncidencia />
       </div>
     </header>
   );

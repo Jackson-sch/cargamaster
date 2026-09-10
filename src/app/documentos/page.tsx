@@ -1,12 +1,13 @@
 import { LayoutShell } from "@/components/layout-shell";
-import { FileCheck2, AlertTriangle, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { obtenerDocumentosYAlertas } from "@/lib/actions/documentos";
 import { ModalNuevoDocumento } from "@/components/documentos/modal-nuevo-documento";
+import { TablaDocumentos } from "@/components/documentos/tabla-documentos";
 
 export const dynamic = "force-dynamic";
 
 export default async function DocumentosPage() {
-  const { documentos, unidades, semirremolques } = await obtenerDocumentosYAlertas();
+  const { documentos = [], unidades = [], semirremolques = [] } = await obtenerDocumentosYAlertas();
 
   const proximosAVencer = documentos.filter(
     (d) => d.estadoAlertaCalculado === "por_vencer"
@@ -55,95 +56,8 @@ export default async function DocumentosPage() {
           />
         </div>
 
-        {/* Audit Table */}
-        <div className="bg-[#111827] border border-[#1F2937] rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-[#1F2937] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-amber-400" />
-              <h2 className="text-sm font-bold text-white font-[family-name:var(--font-sora)]">
-                Documentos Vehiculares & Pólizas de Carga
-              </h2>
-            </div>
-            <span className="text-xs text-slate-400">
-              {documentos.length} documentos auditados
-            </span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left">
-              <thead className="bg-[#0B1220] text-slate-400 uppercase tracking-wider text-[10px] border-b border-[#1F2937]">
-                <tr>
-                  <th className="px-4 py-3 font-semibold">Tipo de Obligación</th>
-                  <th className="px-4 py-3 font-semibold">Unidad / Carreta</th>
-                  <th className="px-4 py-3 font-semibold">N° de Documento</th>
-                  <th className="px-4 py-3 font-semibold">Emisor</th>
-                  <th className="px-4 py-3 font-semibold">Fecha Vencimiento</th>
-                  <th className="px-4 py-3 font-semibold">Días Restantes</th>
-                  <th className="px-4 py-3 font-semibold">Estado Semáforo</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1F2937]">
-                {documentos.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="p-6 text-center text-slate-500">
-                      No hay documentos vehiculares registrados.
-                    </td>
-                  </tr>
-                ) : (
-                  documentos.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-slate-800/30 transition-colors">
-                      <td className="px-4 py-3.5 font-semibold text-white capitalize">
-                        {doc.tipoDocumento.replace(/_/g, " ")}
-                      </td>
-                      <td className="px-4 py-3.5 font-mono text-slate-200 font-bold">
-                        {doc.entidadNombre}
-                      </td>
-                      <td className="px-4 py-3.5 font-mono text-slate-400">
-                        {doc.numeroDocumento}
-                      </td>
-                      <td className="px-4 py-3.5 text-slate-300">
-                        {doc.empresaEmisora || "—"}
-                      </td>
-                      <td className="px-4 py-3.5 text-slate-200">
-                        {doc.fechaVencimiento}
-                      </td>
-                      <td className="px-4 py-3.5 font-mono font-bold">
-                        {doc.diasRestantes <= 0 ? (
-                          <span className="text-rose-400 font-bold">
-                            {Math.abs(doc.diasRestantes)} días vencido
-                          </span>
-                        ) : doc.diasRestantes <= 30 ? (
-                          <span className="text-amber-400 font-bold">
-                            {doc.diasRestantes} días
-                          </span>
-                        ) : (
-                          <span className="text-slate-400">
-                            {doc.diasRestantes} días
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3.5">
-                        {doc.estadoAlertaCalculado === "vencido" ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-rose-500/15 text-rose-400 border border-rose-500/30">
-                            Vencido
-                          </span>
-                        ) : doc.estadoAlertaCalculado === "por_vencer" ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                            Por Vencer
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                            Vigente
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        {/* Audit Table with Search, Filter Tabs, Renewal and Deletion */}
+        <TablaDocumentos documentos={documentos as any} />
       </div>
     </LayoutShell>
   );
