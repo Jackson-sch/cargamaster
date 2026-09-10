@@ -4,14 +4,16 @@ import { z } from "zod";
 // Ejemplos: "ABC-123", "V7A-890", "Z1A-987", "A1B-999"
 export const placaMtcRegex = /^[A-Z0-9]{3}-[A-Z0-9]{3}$/;
 
+export const placaSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(placaMtcRegex, {
+    message: "Formato de placa inválido. Debe ser de 6 caracteres con guion (ej. V7A-890 o ABC-123)",
+  });
+
 export const unidadSchema = z.object({
-  placa: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .regex(placaMtcRegex, {
-      message: "Formato de placa inválido. Debe ser de 6 caracteres con guion (ej. V7A-890 o ABC-123)",
-    }),
+  placa: placaSchema,
   tipoUnidad: z.enum(["tracto", "rigido", "camioneta"], {
     message: "Selecciona un tipo de unidad válido",
   }),
