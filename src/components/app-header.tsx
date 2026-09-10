@@ -58,7 +58,7 @@ export function AppHeader({ title, subtitle }: { title?: string; subtitle?: stri
         {/* Peruvian Official Clock */}
         <div className="hidden sm:flex flex-col text-right font-mono text-xs text-slate-400">
           <span className="text-[11px] text-slate-500 uppercase font-sans font-semibold">Hora Perú (PET)</span>
-          <span className="font-bold text-slate-200">{time || "00:00:00"}</span>
+          <span className="font-bold text-slate-200" suppressHydrationWarning>{time || "00:00:00"}</span>
         </div>
 
         <div className="h-6 w-[1px] bg-[#1F2937] hidden sm:block" />

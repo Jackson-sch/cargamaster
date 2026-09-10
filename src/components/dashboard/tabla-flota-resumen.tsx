@@ -90,7 +90,7 @@ export function TablaFlotaResumen({
                       <span className="text-slate-500 italic">Sin acople</span>
                     )}
                   </td>
-                  <td className="px-4 py-3.5 font-mono text-slate-300">
+                  <td className="px-4 py-3.5 font-mono text-slate-300" suppressHydrationWarning>
                     {u.odometroActualKm?.toLocaleString()} km
                   </td>
                   <td className="px-4 py-3.5">

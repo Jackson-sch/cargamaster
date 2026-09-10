@@ -35,7 +35,10 @@ export default function RootLayout({
       className={`${sora.variable} ${inter.variable} dark h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-[#0B1220] text-[#E5E7EB]">
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-[#0B1220] text-[#E5E7EB]"
+      >
         {children}
         <Toaster
           richColors

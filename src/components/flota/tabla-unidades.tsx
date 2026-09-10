@@ -217,7 +217,7 @@ export function TablaUnidades({ unidades, semirremolques, documentos }: TablaUni
                     <td className="px-4 py-3 font-mono font-medium text-slate-200">
                       {u.capacidadArrastreTn || 0} Tn
                     </td>
-                    <td className="px-4 py-3 font-mono text-slate-300">
+                    <td className="px-4 py-3 font-mono text-slate-300" suppressHydrationWarning>
                       {u.odometroActualKm?.toLocaleString()} km
                     </td>
                     <td className="px-4 py-3">
