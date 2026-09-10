@@ -14,9 +14,11 @@ import {
 } from "@/lib/db/schema";
 import {
   ordenServicioSchema,
+  actualizarOrdenServicioSchema,
   cambioEstadoViajeSchema,
   evidenciaPodSchema,
   type OrdenServicioInput,
+  type ActualizarOrdenServicioInput,
   type CambioEstadoViajeInput,
   type EvidenciaPodInput,
 } from "@/lib/validations/ordenes-servicio";
@@ -324,4 +326,121 @@ export async function obtenerDetalleCompletoViajeAction(ordenId: string) {
     };
   }
 }
+
+export async function actualizarOrdenServicioAction(data: ActualizarOrdenServicioInput) {
+  try {
+    const parsed = actualizarOrdenServicioSchema.parse(data);
+    const empresaId = await getEmpresaId();
+
+    const ordenExistente = await db.query.ordenesServicio.findFirst({
+      where: and(eq(ordenesServicio.id, parsed.id), eq(ordenesServicio.empresaId, empresaId)),
+    });
+
+    if (!ordenExistente) {
+      return { success: false, error: "Orden de servicio no encontrada." };
+    }
+
+    if (ordenExistente.estado === "liquidado" || ordenExistente.estado === "facturado" || ordenExistente.estado === "cancelado") {
+      return {
+        success: false,
+        error: `No se puede modificar una orden en estado "${ordenExistente.estado}".`,
+      };
+    }
+
+    // Cálculo de Detracción SUNAT (4%)
+    const fleteMontoNum = parseFloat(parsed.fletePactadoMonto) || 0;
+    const detraccionMonto = (fleteMontoNum * 0.04).toFixed(2);
+
+    const [actualizada] = await db
+      .update(ordenesServicio)
+      .set({
+        clienteId: parsed.clienteId,
+        rutaId: parsed.rutaId,
+        unidadId: parsed.unidadId,
+        semirremolqueId: parsed.semirremolqueId || null,
+        conductorId: parsed.conductorId,
+        conductorSecundarioId: parsed.conductorSecundarioId || null,
+        tipoCarga: parsed.tipoCarga,
+        descripcionCarga: parsed.descripcionCarga,
+        pesoBrutoKg: parsed.pesoBrutoKg,
+        unidadMedida: parsed.unidadMedida,
+        fechaHoraProgramada: new Date(parsed.fechaHoraProgramada),
+        fletePactadoMoneda: parsed.fletePactadoMoneda,
+        fletePactadoMonto: parsed.fletePactadoMonto,
+        detraccionMonto,
+        adelantoViaticos: parsed.adelantoViaticos,
+        observaciones: parsed.observaciones || null,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(ordenesServicio.id, parsed.id), eq(ordenesServicio.empresaId, empresaId)))
+      .returning();
+
+    revalidatePath("/despacho");
+    revalidatePath("/facturacion");
+    revalidatePath("/liquidaciones");
+    return { success: true, orden: actualizada };
+  } catch (error: any) {
+    console.error("Error al actualizar orden de servicio:", error);
+    return {
+      success: false,
+      error: error?.message || "No se pudo actualizar la orden de servicio.",
+    };
+  }
+}
+
+export async function cancelarOrdenServicioAction(id: string, observacion?: string) {
+  try {
+    const empresaId = await getEmpresaId();
+
+    const orden = await db.query.ordenesServicio.findFirst({
+      where: and(eq(ordenesServicio.id, id), eq(ordenesServicio.empresaId, empresaId)),
+    });
+
+    if (!orden) {
+      return { success: false, error: "Orden de servicio no encontrada." };
+    }
+
+    if (orden.estado === "liquidado" || orden.estado === "facturado") {
+      return {
+        success: false,
+        error: "No se puede cancelar una orden ya liquidada o facturada.",
+      };
+    }
+
+    const estadoAnterior = orden.estado;
+
+    await db
+      .update(ordenesServicio)
+      .set({ estado: "cancelado", updatedAt: new Date() })
+      .where(and(eq(ordenesServicio.id, id), eq(ordenesServicio.empresaId, empresaId)));
+
+    // Registrar en historial de viaje
+    await db.insert(historialEstadosViaje).values({
+      ordenServicioId: id,
+      estadoAnterior,
+      estadoNuevo: "cancelado",
+      observacion: observacion?.trim() || "Orden cancelada por coordinación de despacho",
+    });
+
+    // Liberar unidad si estaba retenida
+    if (orden.unidadId) {
+      await db
+        .update(unidades)
+        .set({ estado: "disponible", updatedAt: new Date() })
+        .where(eq(unidades.id, orden.unidadId));
+    }
+
+    revalidatePath("/despacho");
+    revalidatePath("/flota");
+    revalidatePath("/");
+    return { success: true, message: `Orden ${orden.codigoViaje} cancelada y unidades liberadas.` };
+  } catch (error: any) {
+    console.error("Error al cancelar orden de servicio:", error);
+    return {
+      success: false,
+      error: error?.message || "No se pudo cancelar la orden de servicio.",
+    };
+  }
+}
+
 

@@ -60,6 +60,11 @@ export const evidenciaPodSchema = z.object({
   observaciones: z.string().trim().optional(),
 });
 
+export const actualizarOrdenServicioSchema = ordenServicioSchema.extend({
+  id: z.string().uuid("ID de orden inválido"),
+});
+
 export type OrdenServicioInput = z.infer<typeof ordenServicioSchema>;
+export type ActualizarOrdenServicioInput = z.infer<typeof actualizarOrdenServicioSchema>;
 export type CambioEstadoViajeInput = z.infer<typeof cambioEstadoViajeSchema>;
 export type EvidenciaPodInput = z.infer<typeof evidenciaPodSchema>;

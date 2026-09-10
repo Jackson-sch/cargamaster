@@ -71,6 +71,18 @@ export function ModalDocumentosViaje({
       url: `/api/ordenes/${ordenId}/carta-de-porte`,
       filename: `Carta-de-Porte-${codigoViaje}.pdf`,
     },
+    {
+      id: "gre-transportista",
+      titulo: "Guía de Remisión Transportista (GRE)",
+      normativa: "R.S. 123-2022/SUNAT (Tipo 31)",
+      badge: "SUNAT ELECTRÓNICA",
+      badgeColor: "bg-purple-500/10 text-purple-400 border-purple-500/30",
+      icon: Truck,
+      descripcion:
+        "Guía electrónica oficial exigida por SUNAT para el traslado de bienes de terceros. Incluye QR normativo, validación de placas, RUC de remitente y ubigeos de origen/destino.",
+      url: `/api/ordenes/${ordenId}/gre-transportista`,
+      filename: `GRE-Transportista-${codigoViaje}.pdf`,
+    },
   ];
 
   return (

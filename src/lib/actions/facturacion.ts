@@ -183,16 +183,43 @@ export async function emitirFacturaFleteAction(data: CrearFacturaInput) {
 
 export async function cambiarEstadoPagoFacturaAction(
   comprobanteId: string,
-  nuevoEstado: "pendiente" | "pagado" | "anulado"
+  nuevoEstado: "pendiente" | "pagado" | "anulado",
+  nroConstanciaSpot?: string
 ) {
   try {
+    const cpe = await db.query.comprobantesPago.findFirst({
+      where: eq(comprobantesPago.id, comprobanteId),
+    });
+
+    if (!cpe) {
+      return { success: false, error: "Comprobante no encontrado." };
+    }
+
+    let nuevasObs = cpe.observaciones || "";
+    if (nroConstanciaSpot && nroConstanciaSpot.trim()) {
+      const tagSpot = `[DEPÓSITO SPOT BN: ${nroConstanciaSpot.trim()}]`;
+      if (!nuevasObs.includes("DEPÓSITO SPOT BN:")) {
+        nuevasObs = nuevasObs ? `${nuevasObs} | ${tagSpot}` : tagSpot;
+      }
+    }
+
     await db
       .update(comprobantesPago)
-      .set({ estadoPago: nuevoEstado })
+      .set({
+        estadoPago: nuevoEstado,
+        observaciones: nuevasObs,
+        updatedAt: new Date(),
+      })
       .where(eq(comprobantesPago.id, comprobanteId));
 
     revalidatePath("/facturacion");
-    return { success: true };
+    return {
+      success: true,
+      message:
+        nuevoEstado === "pagado"
+          ? "Pago y depósito SPOT conciliados con éxito."
+          : "Estado de pago actualizado.",
+    };
   } catch (error: any) {
     console.error("Error al cambiar estado de pago:", error);
     return { success: false, error: error.message || "Error al actualizar pago." };
