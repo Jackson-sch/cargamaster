@@ -99,23 +99,23 @@ export function ModalDocumentosViaje({
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-[#111827] border border-[#1F2937] rounded-2xl shadow-2xl overflow-hidden text-left flex flex-col my-8">
+          <div className="w-full max-w-3xl bg-[#111827] border border-[#1F2937] rounded-2xl shadow-2xl overflow-hidden text-left flex flex-col my-8">
             {/* Header */}
-            <div className="p-4 bg-[#0B1220] border-b border-[#1F2937] flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+            <div className="p-4 bg-[#0B1220] border-b border-[#1F2937] flex items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0 flex-1">
+                <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shrink-0 mt-0.5">
                   <FileText className="h-5 w-5" />
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-sm font-bold text-white font-[family-name:var(--font-sora)]">
                       Documentación Oficial de Despacho
                     </h3>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
                       {codigoViaje}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-400 break-words whitespace-normal mt-0.5">
                     Formatos reglamentarios para fiscalización SUTRAN, Policía de Carreteras y respaldo contractual
                   </p>
                 </div>
@@ -123,83 +123,85 @@ export function ModalDocumentosViaje({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors"
+                className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors shrink-0"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Metadatos Rápidos del Viaje */}
-            <div className="px-5 py-3 bg-[#0E1524] border-b border-[#1F2937] text-xs grid grid-cols-2 sm:grid-cols-4 gap-2 text-slate-300">
-              <div className="flex items-center gap-1.5">
+            <div className="px-5 py-3 bg-[#0E1524] border-b border-[#1F2937] text-xs flex flex-wrap items-center gap-x-5 gap-y-2 text-slate-300">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <Truck className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-                <span className="truncate">
+                <span className="font-mono text-slate-200">
                   {placaTracto || "V7A-890"} / {placaCarreta || "Z1A-987"}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <UserCheck className="h-3.5 w-3.5 text-sky-400 shrink-0" />
-                <span className="truncate">
+                <span className="font-medium text-slate-200">
                   {conductorNombre || "Carlos Mendoza"}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 sm:col-span-2">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
                 <MapPin className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                <span className="truncate">
+                <span className="break-words whitespace-normal text-slate-300 font-medium">
                   {rutaNombre || "Lima - Arequipa (Panamericana Sur)"}
                 </span>
               </div>
             </div>
 
             {/* Lista de Documentos */}
-            <div className="p-5 space-y-4 max-h-[65vh] overflow-y-auto">
+            <div className="p-4 sm:p-5 space-y-4 max-h-[65vh] overflow-y-auto overflow-x-hidden">
               {documentos.map((doc) => {
                 const Icon = doc.icon;
                 return (
                   <div
                     key={doc.id}
-                    className="p-4 rounded-xl bg-[#0B1220] border border-[#1F2937] hover:border-slate-700 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    className="p-4 rounded-xl bg-[#0B1220] border border-[#1F2937] hover:border-slate-700 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 w-full min-w-0"
                   >
-                    <div className="flex items-start gap-3 flex-1">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
                       <div className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 shrink-0 mt-0.5">
                         <Icon className="h-5 w-5 text-amber-400" />
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1.5 min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="font-bold text-white text-sm">{doc.titulo}</h4>
+                          <h4 className="font-bold text-white text-sm break-words whitespace-normal">
+                            {doc.titulo}
+                          </h4>
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border ${doc.badgeColor}`}
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold border shrink-0 ${doc.badgeColor}`}
                           >
                             {doc.badge}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-400 font-mono">
+                        <p className="text-[11px] text-slate-400 font-mono break-words whitespace-normal">
                           Normativa: {doc.normativa}
                         </p>
-                        <p className="text-xs text-slate-300 leading-relaxed">
+                        <p className="text-xs text-slate-300 leading-relaxed break-words whitespace-normal">
                           {doc.descripcion}
                         </p>
                       </div>
                     </div>
 
                     {/* Acciones de Visualización y Descarga */}
-                    <div className="flex items-center gap-2 shrink-0 sm:self-center border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-800">
+                    <div className="flex items-center gap-2 shrink-0 self-end md:self-center border-t md:border-t-0 pt-3 md:pt-0 border-slate-800 w-full md:w-auto justify-end">
                       <a
                         href={doc.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="h-8 px-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm"
+                        className="h-8 px-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm shrink-0"
                       >
-                        <Printer className="h-3.5 w-3.5" />
+                        <Printer className="h-3.5 w-3.5 shrink-0" />
                         <span>Abrir / Imprimir</span>
                       </a>
                       <a
                         href={doc.url}
                         download={doc.filename}
-                        className="h-8 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1 transition-colors"
+                        className="h-8 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1 transition-colors shrink-0"
                         title="Descargar archivo PDF"
                       >
-                        <Download className="h-3.5 w-3.5" />
+                        <Download className="h-3.5 w-3.5 shrink-0" />
                       </a>
                     </div>
                   </div>
@@ -208,15 +210,15 @@ export function ModalDocumentosViaje({
             </div>
 
             {/* Footer */}
-            <div className="p-4 bg-[#0B1220] border-t border-[#1F2937] flex items-center justify-between text-xs text-slate-400">
-              <span className="flex items-center gap-1 text-[11px]">
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                Documentos generados con firma electrónica y código QR para control en carretera
+            <div className="p-4 bg-[#0B1220] border-t border-[#1F2937] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-400">
+              <span className="flex items-center gap-1.5 text-[11px] break-words whitespace-normal">
+                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                <span>Documentos generados con firma electrónica y código QR para control en carretera</span>
               </span>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
+                className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors shrink-0 self-end sm:self-auto"
               >
                 Cerrar
               </button>

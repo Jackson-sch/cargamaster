@@ -270,21 +270,24 @@ export function TablaDespacho({
                     </span>
                   </td>
 
-                  <td className="px-4 py-3.5">
-                    <span className="font-medium text-white block max-w-[150px] truncate">
+                  <td className="px-4 py-3.5 min-w-[160px] max-w-[220px]">
+                    <span
+                      className="font-medium text-white block break-words whitespace-normal leading-tight"
+                      title={orden.cliente?.razonSocial}
+                    >
                       {orden.cliente?.razonSocial}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono">
+                    <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
                       RUC {orden.cliente?.numeroDocumento}
                     </span>
                   </td>
 
-                  <td className="px-4 py-3.5">
-                    <span className="text-slate-200 block font-medium">
+                  <td className="px-4 py-3.5 min-w-[170px] max-w-[240px]">
+                    <span className="text-slate-200 block font-medium break-words whitespace-normal leading-tight">
                       {orden.ruta?.origenDistrito || orden.ruta?.origenDepartamento} &rarr;{" "}
                       {orden.ruta?.destinoDistrito || orden.ruta?.destinoDepartamento}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono">
+                    <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
                       {orden.ruta?.distanciaEstimadaKm} km ({orden.ruta?.codigoRuta})
                     </span>
                   </td>
@@ -306,11 +309,14 @@ export function TablaDespacho({
                     </span>
                   </td>
 
-                  <td className="px-4 py-3.5">
-                    <span className="text-slate-200 block max-w-[140px] truncate font-medium">
+                  <td className="px-4 py-3.5 min-w-[140px] max-w-[200px]">
+                    <span
+                      className="text-slate-200 block break-words whitespace-normal leading-tight font-medium"
+                      title={orden.descripcionCarga}
+                    >
                       {orden.descripcionCarga}
                     </span>
-                    <span className="text-[10px] text-slate-400 font-mono">
+                    <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
                       {(parseFloat(String(orden.pesoBrutoKg)) / 1000).toFixed(1)} Tn ({orden.tipoCarga})
                     </span>
                   </td>
