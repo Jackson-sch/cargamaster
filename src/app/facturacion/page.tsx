@@ -9,6 +9,7 @@ import { ModalEmitirFactura } from "@/components/facturacion/modal-emitir-factur
 import { FacturacionMetricas } from "@/components/facturacion/facturacion-metricas";
 import { TablaFacturas } from "@/components/facturacion/tabla-facturas";
 import { TablaGuias } from "@/components/facturacion/tabla-guias";
+import { BotonExportarExcel } from "@/components/reportes/boton-exportar-excel";
 
 export default async function FacturacionPage() {
   const [comprobantesRes, guiasRes, ordenesRes, clientesRes] = await Promise.all([
@@ -63,6 +64,10 @@ export default async function FacturacionPage() {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
+            <BotonExportarExcel
+              endpoint="/api/reportes/detracciones"
+              label="Exportar SPOT (.xlsx)"
+            />
             <ModalEmitirGre
               ordenesDisponibles={ordenes.map((o) => ({
                 id: o.id,

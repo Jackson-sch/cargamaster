@@ -8,6 +8,7 @@ import { obtenerConductoresCompletos } from "@/lib/actions/conductores";
 import { ModalNuevaOrden } from "@/components/despacho/modal-nueva-orden";
 import { DespachoMetricas } from "@/components/despacho/despacho-metricas";
 import { TablaDespacho } from "@/components/despacho/tabla-despacho";
+import { BotonExportarExcel } from "@/components/reportes/boton-exportar-excel";
 
 export default async function DespachoPage() {
   const [ordenesRes, clientesRes, rutasRes, flotaRes, conductoresRes] =
@@ -49,7 +50,12 @@ export default async function DespachoPage() {
             </button>
           </div>
 
-          <ModalNuevaOrden
+          <div className="flex items-center gap-2 flex-wrap">
+            <BotonExportarExcel
+              endpoint="/api/reportes/despacho"
+              label="Exportar Despacho (.xlsx)"
+            />
+            <ModalNuevaOrden
             clientes={clientes.map((c) => ({
               id: c.id,
               razonSocial: c.razonSocial,
@@ -81,6 +87,7 @@ export default async function DespachoPage() {
               estado: c.estado,
             }))}
           />
+          </div>
         </div>
 
         {/* Resumen de Métricas */}

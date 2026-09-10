@@ -5,6 +5,7 @@ import {
   obtenerDatosParaRegistroCombustible,
 } from "@/lib/actions/combustible";
 import { ModalNuevoConsumo } from "@/components/combustible/modal-nuevo-consumo";
+import { BotonExportarExcel } from "@/components/reportes/boton-exportar-excel";
 
 export const dynamic = "force-dynamic";
 
@@ -119,11 +120,17 @@ export default async function CombustiblePage() {
                 Vales de Carga de Combustible
               </h2>
             </div>
-            <ModalNuevoConsumo
-              unidades={unidades}
-              conductores={conductores}
-              ordenes={ordenes}
-            />
+            <div className="flex items-center gap-2 flex-wrap">
+              <BotonExportarExcel
+                endpoint="/api/reportes/combustible"
+                label="Exportar Consumo Diesel (.xlsx)"
+              />
+              <ModalNuevoConsumo
+                unidades={unidades}
+                conductores={conductores}
+                ordenes={ordenes}
+              />
+            </div>
           </div>
 
           <div className="overflow-x-auto">

@@ -3,6 +3,7 @@ import { Wallet, CheckCircle2, DollarSign, Clock, Receipt, AlertCircle } from "l
 import { obtenerLiquidacionesCompletas } from "@/lib/actions/liquidaciones";
 import { obtenerOrdenesServicioCompletas } from "@/lib/actions/ordenes-servicio";
 import { ModalNuevaLiquidacion } from "@/components/liquidaciones/modal-nueva-liquidacion";
+import { BotonExportarExcel } from "@/components/reportes/boton-exportar-excel";
 
 export default async function LiquidacionesPage() {
   const [liquidacionesRes, ordenesRes] = await Promise.all([
@@ -37,7 +38,12 @@ export default async function LiquidacionesPage() {
             Control de anticipos, gastos justificados con comprobante y balance final por viaje.
           </p>
 
-          <ModalNuevaLiquidacion
+          <div className="flex items-center gap-2 flex-wrap">
+            <BotonExportarExcel
+              endpoint="/api/reportes/liquidaciones"
+              label="Exportar Liquidaciones (.xlsx)"
+            />
+            <ModalNuevaLiquidacion
             ordenesDisponibles={ordenes.map((o) => ({
               id: o.id,
               codigoViaje: o.codigoViaje,
@@ -54,6 +60,7 @@ export default async function LiquidacionesPage() {
               cliente: o.cliente ? { razonSocial: o.cliente.razonSocial } : null,
             }))}
           />
+          </div>
         </div>
 
         {/* KPIs */}
