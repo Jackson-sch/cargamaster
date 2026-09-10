@@ -10,9 +10,10 @@ import { UserMenu } from "@/components/auth/user-menu";
 
 export function AppHeader({ title, subtitle }: { title?: string; subtitle?: string }) {
   const [time, setTime] = useState<string>("");
+  const [date, setDate] = useState<string>("");
 
   useEffect(() => {
-    const updateTime = () => {
+    const updateDateTime = () => {
       const now = new Date();
       setTime(
         now.toLocaleTimeString("es-PE", {
@@ -22,16 +23,32 @@ export function AppHeader({ title, subtitle }: { title?: string; subtitle?: stri
           hour12: false,
         })
       );
+
+      // Formatear fecha: ej. "Jue, 10 Set 2026"
+      const rawDate = now.toLocaleDateString("es-PE", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      });
+      const cleanDate = rawDate
+        .replace(/\./g, "")
+        .split(" ")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+
+      setDate(cleanDate);
     };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
+
+    updateDateTime();
+    const interval = setInterval(updateDateTime, 1000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <header className="h-16 shrink-0 bg-[#0E1524] border-b border-[#1F2937] px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
+    <header className="h-16 shrink-0 bg-[#0E1524] border-b border-[#1F2937] px-4 sm:px-6 flex items-center justify-between gap-4 sticky top-0 z-30">
       {/* Title / Section */}
-      <div className="min-w-0 pr-2">
+      <div className="min-w-0 pr-2 shrink-0">
         <h1 className="text-sm sm:text-base font-bold text-white tracking-tight font-[family-name:var(--font-sora)] truncate">
           {title || "Centro de Control Logístico"}
         </h1>
@@ -43,7 +60,7 @@ export function AppHeader({ title, subtitle }: { title?: string; subtitle?: stri
       </div>
 
       {/* Center / Global Search & Live Radio */}
-      <div className="hidden md:flex items-center gap-3">
+      <div className="hidden lg:flex items-center gap-3 shrink-0">
         <BuscadorGlobalNavbar />
 
         {/* Live GPS Feed pill */}
@@ -55,13 +72,23 @@ export function AppHeader({ title, subtitle }: { title?: string; subtitle?: stri
 
       {/* Right Controls */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        {/* Peruvian Official Clock */}
-        <div className="hidden xl:flex flex-col text-right font-mono text-xs text-slate-400">
-          <span className="text-[10px] text-slate-500 uppercase font-sans font-semibold">Hora Oficial (PET)</span>
-          <span className="font-bold text-slate-200" suppressHydrationWarning>{time || "00:00:00"}</span>
+        {/* Fecha y Hora Oficial Perú */}
+        <div className="hidden xl:flex flex-col text-right font-mono text-xs text-slate-400 shrink-0">
+          <span
+            className="text-[10px] text-amber-400/90 font-sans font-semibold tracking-tight"
+            suppressHydrationWarning
+          >
+            {date || "Fecha Oficial"}
+          </span>
+          <span
+            className="font-bold text-slate-100 tracking-wider"
+            suppressHydrationWarning
+          >
+            {time || "00:00:00"}
+          </span>
         </div>
 
-        <div className="h-6 w-[1px] bg-[#1F2937] hidden xl:block" />
+        <div className="h-6 w-[1px] bg-[#1F2937] hidden xl:block shrink-0" />
 
         {/* Sede selector funcional */}
         <SelectorSedeNavbar />
@@ -72,7 +99,7 @@ export function AppHeader({ title, subtitle }: { title?: string; subtitle?: stri
         {/* SOS / Reportar Incidencia Operativa */}
         <ModalReportarIncidencia />
 
-        <div className="h-6 w-[1px] bg-[#1F2937] hidden sm:block" />
+        <div className="h-6 w-[1px] bg-[#1F2937] hidden sm:block shrink-0" />
 
         {/* Perfil de Usuario & Cerrar Sesión */}
         <UserMenu variant="header" />
