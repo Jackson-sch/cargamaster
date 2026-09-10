@@ -12,8 +12,10 @@ import {
 import {
   crearMantenimientoSchema,
   cambiarEstadoMantenimientoSchema,
+  actualizarMantenimientoSchema,
   type CrearMantenimientoInput,
   type CambiarEstadoMantenimientoInput,
+  type ActualizarMantenimientoInput,
 } from "@/lib/validations/mantenimiento";
 import { eq, and, desc } from "drizzle-orm";
 
@@ -315,3 +317,103 @@ export async function cambiarEstadoMantenimientoAction(data: CambiarEstadoManten
     };
   }
 }
+
+export async function actualizarMantenimientoAction(data: ActualizarMantenimientoInput) {
+  try {
+    const empresaId = await getEmpresaId();
+    const parsed = actualizarMantenimientoSchema.safeParse(data);
+    if (!parsed.success) {
+      return {
+        success: false,
+        error: parsed.error.issues[0]?.message || "Datos de actualización inválidos.",
+      };
+    }
+
+    const val = parsed.data;
+
+    const mantExistente = await db.query.mantenimientos.findFirst({
+      where: and(eq(mantenimientos.id, val.id), eq(mantenimientos.empresaId, empresaId)),
+    });
+
+    if (!mantExistente) {
+      return {
+        success: false,
+        error: "La orden de trabajo de mantenimiento no existe.",
+      };
+    }
+
+    const [actualizado] = await db
+      .update(mantenimientos)
+      .set({
+        tipo: val.tipo,
+        descripcion: val.descripcion.trim(),
+        odometroRegistro: val.odometroRegistro || null,
+        fechaProgramada: val.fechaProgramada,
+        taller: val.taller,
+        nombreTaller: val.nombreTaller.trim(),
+        costoManoObra: val.costoManoObra.toFixed(2),
+        costoRepuestos: val.costoRepuestos.toFixed(2),
+        costoTotal: val.costoTotal.toFixed(2),
+        observaciones: val.observaciones && val.observaciones.trim() !== "" ? val.observaciones.trim() : null,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(mantenimientos.id, val.id), eq(mantenimientos.empresaId, empresaId)))
+      .returning();
+
+    revalidatePath("/mantenimiento");
+    revalidatePath("/flota");
+    return {
+      success: true,
+      message: "Orden de mantenimiento actualizada correctamente.",
+      mantenimiento: actualizado,
+    };
+  } catch (error) {
+    console.error("Error al actualizar orden de mantenimiento:", error);
+    return {
+      success: false,
+      error: "No se pudo actualizar la orden de mantenimiento.",
+    };
+  }
+}
+
+export async function eliminarMantenimientoAction(id: string) {
+  try {
+    const empresaId = await getEmpresaId();
+
+    const mantExistente = await db.query.mantenimientos.findFirst({
+      where: and(eq(mantenimientos.id, id), eq(mantenimientos.empresaId, empresaId)),
+    });
+
+    if (!mantExistente) {
+      return {
+        success: false,
+        error: "La orden de trabajo no existe o ya fue eliminada.",
+      };
+    }
+
+    if (mantExistente.estado === "en_proceso") {
+      return {
+        success: false,
+        error: "No se puede eliminar una orden de trabajo actualmente en taller (en proceso). Primero libere la unidad o cambie el estado.",
+      };
+    }
+
+    await db
+      .delete(mantenimientos)
+      .where(and(eq(mantenimientos.id, id), eq(mantenimientos.empresaId, empresaId)));
+
+    revalidatePath("/mantenimiento");
+    revalidatePath("/flota");
+    return {
+      success: true,
+      message: "Orden de mantenimiento eliminada del sistema.",
+    };
+  } catch (error) {
+    console.error("Error al eliminar mantenimiento:", error);
+    return {
+      success: false,
+      error: "Ocurrió un error al eliminar la orden de mantenimiento.",
+    };
+  }
+}
+
