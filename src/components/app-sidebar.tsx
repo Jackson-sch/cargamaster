@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -21,6 +22,8 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UserMenu } from "@/components/auth/user-menu";
+import { tieneAccesoRuta, MATRIZ_ROLES, type AppRole } from "@/lib/auth/roles-permissions";
 
 export interface NavItem {
   title: string;
@@ -131,6 +134,40 @@ export const navigationGroups: NavGroup[] = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const [activeRole, setActiveRole] = useState<string>("admin");
+  const [activeRoleName, setActiveRoleName] = useState<string>("Administrador General");
+
+  useEffect(() => {
+    const checkRole = () => {
+      if (typeof window !== "undefined") {
+        const saved = localStorage.getItem("cargamaster_active_user");
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (parsed.rol) {
+              setActiveRole(parsed.rol);
+              const info = MATRIZ_ROLES[parsed.rol as AppRole];
+              setActiveRoleName(info ? info.nombreVisible : parsed.rolNombre || parsed.rol);
+            }
+          } catch {}
+        } else {
+          setActiveRole("admin");
+          setActiveRoleName("Administrador General");
+        }
+      }
+    };
+
+    checkRole();
+    window.addEventListener("cargamaster_role_changed", checkRole);
+    return () => window.removeEventListener("cargamaster_role_changed", checkRole);
+  }, []);
+
+  const filteredGroups = navigationGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => tieneAccesoRuta(activeRole, item.url)),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <aside
@@ -157,20 +194,29 @@ export function AppSidebar() {
         </div>
       </div>
 
-      {/* Tenant Indicator */}
-      <div className="px-4 py-2.5 bg-[#0B1220]/70 border-b border-[#1F2937]/70 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2 truncate">
-          <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-          <span className="text-slate-300 font-medium truncate">
-            TRANSANDINA S.A.C.
+      {/* Tenant Indicator & Rol Activo */}
+      <div className="px-4 py-2 bg-[#0B1220]/70 border-b border-[#1F2937]/70 space-y-1 text-xs">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 truncate">
+            <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+            <span className="text-slate-300 font-semibold truncate text-[11px]">
+              TRANSANDINA S.A.C.
+            </span>
+          </div>
+          <span className="text-[10px] text-slate-500 font-mono">20601234567</span>
+        </div>
+
+        <div className="flex items-center justify-between text-[10px]">
+          <span className="text-slate-500 uppercase font-semibold">Perfil RBAC:</span>
+          <span className="font-semibold text-amber-400 truncate max-w-[120px]" title={activeRoleName}>
+            {activeRoleName}
           </span>
         </div>
-        <span className="text-[10px] text-slate-500 font-mono">20601234567</span>
       </div>
 
       {/* Nav Groups */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
-        {navigationGroups.map((group) => (
+        {filteredGroups.map((group) => (
           <div key={group.label}>
             <p className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
               {group.label}
@@ -247,28 +293,8 @@ export function AppSidebar() {
         </p>
       </div>
 
-      {/* User Footer */}
-      <div
-        suppressHydrationWarning
-        className="p-3 border-t border-[#1F2937] bg-[#0E1524] flex items-center justify-between"
-      >
-        <div suppressHydrationWarning className="flex items-center gap-2.5 min-w-0">
-          <div
-            suppressHydrationWarning
-            className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-amber-400 shrink-0"
-          >
-            {"CM"}
-          </div>
-          <div suppressHydrationWarning className="min-w-0 truncate">
-            <p className="text-xs font-medium text-slate-200 truncate">
-              Carlos Mendoza
-            </p>
-            <p className="text-[10px] text-slate-300 capitalize truncate">
-              Administrador Flota
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* User Footer & Session Control */}
+      <UserMenu variant="sidebar" />
     </aside>
   );
 }

@@ -6,6 +6,7 @@ import { SelectorSedeNavbar } from "@/components/navbar/selector-sede";
 import { BuscadorGlobalNavbar } from "@/components/navbar/buscador-global";
 import { PanelNotificacionesNavbar } from "@/components/navbar/panel-notificaciones";
 import { ModalReportarIncidencia } from "@/components/navbar/modal-reportar-incidencia";
+import { UserMenu } from "@/components/auth/user-menu";
 
 export function AppHeader({ title, subtitle }: { title?: string; subtitle?: string }) {
   const [time, setTime] = useState<string>("");
@@ -70,6 +71,11 @@ export function AppHeader({ title, subtitle }: { title?: string; subtitle?: stri
 
         {/* SOS / Reportar Incidencia Operativa */}
         <ModalReportarIncidencia />
+
+        <div className="h-6 w-[1px] bg-[#1F2937] hidden sm:block" />
+
+        {/* Perfil de Usuario & Cerrar Sesión */}
+        <UserMenu variant="header" />
       </div>
     </header>
   );
