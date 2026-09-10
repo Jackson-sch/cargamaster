@@ -162,16 +162,19 @@ export function UserMenu({ variant = "sidebar" }: UserMenuProps) {
 
   if (variant === "header") {
     return (
-      <div className="relative">
+      <div className="relative" suppressHydrationWarning>
         <button
           onClick={() => setOpen(!open)}
           className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-800/60 border border-transparent hover:border-[#1F2937] transition-colors"
           title="Menú de Usuario y Rol"
         >
-          <div className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-amber-400">
+          <div
+            suppressHydrationWarning
+            className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-amber-400"
+          >
             {currentUser.iniciales}
           </div>
-          <div className="hidden xl:block text-left">
+          <div className="hidden xl:block text-left" suppressHydrationWarning>
             <span className="text-xs font-semibold text-slate-200 block leading-tight">
               {currentUser.nombre}
             </span>
@@ -261,17 +264,20 @@ export function UserMenu({ variant = "sidebar" }: UserMenuProps) {
 
   // Sidebar Variant
   return (
-    <div className="p-3 border-t border-[#1F2937] bg-[#0E1524]">
+    <div className="p-3 border-t border-[#1F2937] bg-[#0E1524]" suppressHydrationWarning>
       <div className="flex items-center justify-between">
         <button
           onClick={() => setModalRolesOpen(true)}
           className="flex items-center gap-2.5 min-w-0 text-left hover:opacity-85 transition-opacity flex-1 mr-2"
           title="Clic para cambiar de rol o simular perfil"
         >
-          <div className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-amber-400 shrink-0">
+          <div
+            suppressHydrationWarning
+            className="h-8 w-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-amber-400 shrink-0"
+          >
             {currentUser.iniciales}
           </div>
-          <div className="min-w-0 truncate">
+          <div className="min-w-0 truncate" suppressHydrationWarning>
             <p className="text-xs font-semibold text-slate-200 truncate leading-tight">
               {currentUser.nombre}
             </p>

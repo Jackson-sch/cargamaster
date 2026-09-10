@@ -195,7 +195,7 @@ export function AppSidebar() {
       </div>
 
       {/* Tenant Indicator & Rol Activo */}
-      <div className="px-4 py-2 bg-[#0B1220]/70 border-b border-[#1F2937]/70 space-y-1 text-xs">
+      <div className="px-4 py-2 bg-[#0B1220]/70 border-b border-[#1F2937]/70 space-y-1 text-xs" suppressHydrationWarning>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 truncate">
             <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
@@ -206,9 +206,13 @@ export function AppSidebar() {
           <span className="text-[10px] text-slate-500 font-mono">20601234567</span>
         </div>
 
-        <div className="flex items-center justify-between text-[10px]">
+        <div className="flex items-center justify-between text-[10px]" suppressHydrationWarning>
           <span className="text-slate-500 uppercase font-semibold">Perfil RBAC:</span>
-          <span className="font-semibold text-amber-400 truncate max-w-[120px]" title={activeRoleName}>
+          <span
+            suppressHydrationWarning
+            className="font-semibold text-amber-400 truncate max-w-[120px]"
+            title={activeRoleName}
+          >
             {activeRoleName}
           </span>
         </div>
