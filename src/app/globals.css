@@ -86,3 +86,90 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
   background: #374151;
 }
+
+/* ============================================================ */
+/* INDUSTRIAL FORM CONTROLS & SELECT STYLING                    */
+/* ============================================================ */
+
+/* Custom styled select with chevron SVG */
+select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23F59E0B' stroke-width='2.2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-position: right 0.85rem center;
+  background-repeat: no-repeat;
+  background-size: 1rem 1rem;
+  padding-right: 2.75rem !important;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+select:hover {
+  border-color: #374151;
+}
+
+select:focus {
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18) !important;
+  outline: none !important;
+}
+
+select option {
+  background-color: #0E1524 !important;
+  color: #F3F4F6 !important;
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+}
+
+select option:checked {
+  background-color: #1E293B !important;
+  color: #FBBF24 !important;
+  font-weight: bold;
+}
+
+select option:hover {
+  background-color: #1F2937 !important;
+}
+
+select optgroup {
+  background-color: #0B1220 !important;
+  color: #9CA3AF !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+}
+
+/* Styled inputs and textareas */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="datetime-local"],
+textarea {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:hover, textarea:hover {
+  border-color: #374151;
+}
+
+input:focus, textarea:focus {
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.18) !important;
+  outline: none !important;
+}
+
+/* Calendar picker indicator in dark mode */
+::-webkit-calendar-picker-indicator {
+  filter: invert(0.8) sepia(1) saturate(5) hue-rotate(345deg);
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+}
+
+::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}

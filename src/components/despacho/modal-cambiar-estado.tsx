@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { RefreshCw, X, Loader2, Navigation, CheckCircle2 } from "lucide-react";
+import { FormSelect, FormInput } from "@/components/ui/form-controls";
 import { cambiarEstadoViajeAction } from "@/lib/actions/ordenes-servicio";
 import { toast } from "sonner";
 
@@ -56,7 +57,7 @@ export function ModalCambiarEstado({
         className="px-2.5 py-1 rounded bg-[#0B1220] border border-[#1F2937] hover:border-amber-500 text-slate-300 hover:text-amber-400 text-xs font-medium flex items-center gap-1 transition-colors"
       >
         <RefreshCw className="h-3 w-3" />
-        <span>Actualizar Estado</span>
+        {/* <span>Actualizar Estado</span> */}
       </button>
 
       {open && (
@@ -80,52 +81,44 @@ export function ModalCambiarEstado({
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
-              <div className="space-y-3 text-xs">
-                <div>
-                  <label className="block text-slate-300 font-medium mb-1">
-                    Nuevo Estado Operativo *
-                  </label>
-                  <select
-                    value={nuevoEstado}
-                    onChange={(e) => setNuevoEstado(e.target.value)}
-                    className="w-full h-9 bg-[#0B1220] border border-[#1F2937] rounded px-3 text-white font-bold focus:border-amber-500 focus:outline-none"
-                  >
-                    <option value="programado">1. Programado (En espera de carga)</option>
-                    <option value="cargando">2. Cargando en almacén/puerto</option>
-                    <option value="en_ruta">3. En Ruta (Inicia trayecto en carretera)</option>
-                    <option value="en_destino">4. En Destino (Garita del cliente)</option>
-                    <option value="descargado">5. Descargado</option>
-                    <option value="entregado">6. Entregado (Conformidad receptor)</option>
-                    <option value="cancelado">Cancelado</option>
-                  </select>
-                </div>
+              <div className="space-y-4 text-xs">
+                <FormSelect
+                  label="Nuevo Estado Operativo"
+                  required
+                  icon={Navigation}
+                  value={nuevoEstado}
+                  onChange={(e) => setNuevoEstado(e.target.value)}
+                  className="font-bold text-amber-300"
+                >
+                  <option value="programado">1. Programado (En espera de carga)</option>
+                  <option value="cargando">2. Cargando en almacén/puerto</option>
+                  <option value="en_ruta">3. En Ruta (Inicia trayecto en carretera)</option>
+                  <option value="en_destino">4. En Destino (Garita del cliente)</option>
+                  <option value="descargado">5. Descargado</option>
+                  <option value="entregado">6. Entregado (Conformidad receptor)</option>
+                  <option value="cancelado">Cancelado</option>
+                </FormSelect>
 
-                <div>
-                  <label className="block text-slate-300 font-medium mb-1">
-                    Lectura de Odómetro (Km)
-                  </label>
-                  <input
-                    type="number"
-                    placeholder="Ej. 84520"
-                    value={odometro}
-                    onChange={(e) => setOdometro(e.target.value)}
-                    className="w-full h-9 bg-[#0B1220] border border-[#1F2937] rounded px-3 text-white font-mono focus:border-amber-500 focus:outline-none"
-                  />
-                  <span className="text-[10px] text-slate-500">
-                    Opcional: registra el odómetro exacto al iniciar o finalizar ruta
-                  </span>
-                </div>
+                <FormInput
+                  label="Lectura de Odómetro en Hito"
+                  type="number"
+                  suffix="Km"
+                  placeholder="Ej. 84520"
+                  value={odometro}
+                  onChange={(e) => setOdometro(e.target.value)}
+                  helperText="Opcional: registra el odómetro exacto al iniciar o finalizar ruta"
+                />
 
-                <div>
-                  <label className="block text-slate-300 font-medium mb-1">
+                <div className="space-y-1.5">
+                  <label className="block text-slate-300 font-semibold tracking-wide">
                     Observaciones / Incidencia de Hito
                   </label>
                   <textarea
-                    rows={2}
-                    placeholder="Ej. Precinto de seguridad colocado, sin observaciones..."
+                    rows={3}
+                    placeholder="Ej. Precinto de seguridad colocado, sin novedades en carretera..."
                     value={observacion}
                     onChange={(e) => setObservacion(e.target.value)}
-                    className="w-full bg-[#0B1220] border border-[#1F2937] rounded p-2.5 text-white placeholder:text-slate-600 focus:border-amber-500 focus:outline-none"
+                    className="w-full bg-[#0E1524] border border-[#1F2937] hover:border-slate-600 focus:border-amber-500 rounded-xl p-3 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 transition-all leading-relaxed"
                   />
                 </div>
               </div>

@@ -13,9 +13,26 @@ import {
   DollarSign,
   AlertTriangle,
   CheckCircle2,
+  Container,
+  Activity,
+  Tag,
 } from "lucide-react";
 import { crearMantenimientoAction } from "@/lib/actions/mantenimiento";
 import { toast } from "sonner";
+import {
+  FormFieldset,
+  FormSelect,
+  FormInput,
+  FormTextarea,
+} from "@/components/ui/form-controls";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
 
 interface UnidadOption {
   id: string;
@@ -185,43 +202,40 @@ export function ModalNuevoMantenimiento({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="h-9 px-4 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-lg shadow-amber-500/10"
+        className="h-9 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-colors shadow-lg shadow-amber-500/10"
       >
         <Plus className="h-4 w-4" />
         <span>Nueva Orden de Trabajo (OT)</span>
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-[#111827] border border-[#1F2937] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl my-8">
-            {/* Header */}
-            <div className="p-5 border-b border-[#1F2937] flex items-center justify-between bg-[#0B1220]/60">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400">
-                  <Wrench className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white font-[family-name:var(--font-sora)]">
-                    Nueva Orden de Trabajo Mecánico
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    Intervención técnica preventiva o correctiva para tracto-camiones y semirremolques
-                  </p>
-                </div>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-2xl md:max-w-3xl p-0 flex flex-col h-full bg-[#0E1524] border-l border-[#1F2937] text-left"
+        >
+          {/* Header */}
+          <SheetHeader className="p-5 border-b border-[#1F2937] bg-[#0B1220]/90 shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                <Wrench className="h-5 w-5" />
               </div>
-              <button
-                onClick={() => setOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
-              {/* Presets Rápidos */}
               <div>
-                <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 block mb-2">
-                  Plantillas de Mantenimiento Frecuentes
+                <SheetTitle className="text-base font-bold text-white font-[family-name:var(--font-sora)]">
+                  Nueva Orden de Trabajo Mecánico (OT)
+                </SheetTitle>
+                <SheetDescription className="text-xs text-slate-400">
+                  Intervención técnica preventiva o correctiva para tracto-camiones y semirremolques
+                </SheetDescription>
+              </div>
+            </div>
+          </SheetHeader>
+
+          <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0">
+            <div className="p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
+              {/* Presets Rápidos */}
+              <div className="bg-[#0B1220] p-3.5 rounded-xl border border-[#1F2937]">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-2 font-[family-name:var(--font-sora)]">
+                  ⚡ Plantillas Pre-configuradas de Mantenimiento
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {PRESETS_MANTENIMIENTO.map((p) => (
@@ -229,10 +243,10 @@ export function ModalNuevoMantenimiento({
                       key={p.titulo}
                       type="button"
                       onClick={() => handlePresetSelect(p)}
-                      className={`text-[11px] px-2.5 py-1 rounded-md border transition-all ${
+                      className={`text-xs px-2.5 py-1 rounded-lg border transition-all ${
                         descripcion === p.titulo
-                          ? "bg-amber-500/20 border-amber-500 text-amber-300 font-semibold"
-                          : "bg-slate-900 border-[#1F2937] text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                          ? "bg-amber-500/20 border-amber-500 text-amber-300 font-semibold shadow-sm"
+                          : "bg-[#0E1524] border-[#1F2937] text-slate-400 hover:text-slate-200 hover:border-slate-700"
                       }`}
                     >
                       {p.titulo.split(" (")[0]}
@@ -242,47 +256,51 @@ export function ModalNuevoMantenimiento({
               </div>
 
               {/* Selector de Tipo de Entidad y Equipo */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Tipo de Equipo *
-                  </label>
-                  <div className="grid grid-cols-2 gap-1 bg-[#0B1220] p-1 border border-[#1F2937] rounded-lg text-xs">
-                    <button
-                      type="button"
-                      onClick={() => handleEntidadTipoChange("unidad")}
-                      className={`py-1.5 px-2 rounded font-medium transition-colors ${
-                        entidadTipo === "unidad"
-                          ? "bg-amber-500 text-slate-950 font-bold"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      Tracto / Rígido
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleEntidadTipoChange("semirremolque")}
-                      className={`py-1.5 px-2 rounded font-medium transition-colors ${
-                        entidadTipo === "semirremolque"
-                          ? "bg-amber-500 text-slate-950 font-bold"
-                          : "text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      Semirremolque
-                    </button>
+              <FormFieldset
+                title="1. Asignación de Unidad y Kilometraje"
+                description="Selecciona si la OT aplica al tracto motriz o a la carreta de carga"
+                icon={Truck}
+              >
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold text-slate-300 block mb-1.5">
+                      Tipo de Flota *
+                    </label>
+                    <div className="grid grid-cols-2 gap-1.5 bg-[#070C16] p-1 border border-[#1F2937] rounded-xl text-xs">
+                      <button
+                        type="button"
+                        onClick={() => handleEntidadTipoChange("unidad")}
+                        className={`py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                          entidadTipo === "unidad"
+                            ? "bg-amber-500 text-slate-950 font-bold shadow"
+                            : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        <Truck className="h-4 w-4" />
+                        <span>Tracto / Rígido</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleEntidadTipoChange("semirremolque")}
+                        className={`py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                          entidadTipo === "semirremolque"
+                            ? "bg-amber-500 text-slate-950 font-bold shadow"
+                            : "text-slate-400 hover:text-white"
+                        }`}
+                      >
+                        <Container className="h-4 w-4" />
+                        <span>Semirremolque / Carreta</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <div className="md:col-span-2">
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Seleccionar {entidadTipo === "unidad" ? "Tracto Vehicular" : "Semirremolque / Carreta"} *
-                  </label>
                   {entidadTipo === "unidad" ? (
-                    <select
+                    <FormSelect
+                      label="Tracto Vehicular MTC"
+                      required
+                      icon={Truck}
                       value={entidadId}
                       onChange={(e) => handleSelectUnidad(e.target.value)}
-                      className="w-full bg-[#0B1220] border border-[#1F2937] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                      required
                     >
                       <option value="">-- Seleccionar Tracto --</option>
                       {unidades.map((u) => (
@@ -290,91 +308,84 @@ export function ModalNuevoMantenimiento({
                           {u.placa} ({u.marca} {u.modelo}) - {u.odometroActualKm.toLocaleString()} km [{u.estado}]
                         </option>
                       ))}
-                    </select>
+                    </FormSelect>
                   ) : (
-                    <select
+                    <FormSelect
+                      label="Semirremolque / Carreta MTC"
+                      required
+                      icon={Container}
                       value={entidadId}
                       onChange={(e) => setEntidadId(e.target.value)}
-                      className="w-full bg-[#0B1220] border border-[#1F2937] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                      required
                     >
                       <option value="">-- Seleccionar Semirremolque --</option>
                       {semirremolques.map((s) => (
                         <option key={s.id} value={s.id}>
-                          {s.placa} ({s.tipoCarroceria} - {s.marca}) [{s.estado}]
+                          {s.placa} ({s.tipoCarroceria} - {s.marca || "Carreta"}) [{s.estado}]
                         </option>
                       ))}
-                    </select>
+                    </FormSelect>
                   )}
                 </div>
-              </div>
+              </FormFieldset>
 
-              {/* Tipo de Mantenimiento y Odómetro */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Naturaleza *
-                  </label>
-                  <select
+              {/* Naturaleza, Odómetro y Fecha */}
+              <FormFieldset
+                title="2. Alcance & Programación"
+                description="Clasificación de mantenimiento y fecha de ingreso al taller"
+                icon={Calendar}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <FormSelect
+                    label="Naturaleza *"
+                    required
                     value={tipo}
                     onChange={(e) => setTipo(e.target.value as "preventivo" | "correctivo")}
-                    className="w-full bg-[#0B1220] border border-[#1F2937] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
                   >
                     <option value="preventivo">Preventivo Programado</option>
                     <option value="correctivo">Correctivo / Avería en Ruta</option>
-                  </select>
-                </div>
+                  </FormSelect>
 
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Odómetro Intervención (Km)
-                  </label>
-                  <input
+                  <FormInput
+                    label="Odómetro (Km)"
                     type="number"
+                    icon={Activity}
+                    suffix="Km"
+                    disabled={entidadTipo === "semirremolque"}
                     value={odometroRegistro}
                     onChange={(e) => setOdometroRegistro(e.target.value)}
-                    disabled={entidadTipo === "semirremolque"}
-                    placeholder="84000"
-                    className="w-full bg-[#0B1220] border border-[#1F2937] rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-amber-500 disabled:opacity-40"
                   />
-                </div>
 
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Fecha Programada *
-                  </label>
-                  <input
+                  <FormInput
+                    label="Fecha Programada"
                     type="date"
+                    required
+                    icon={Calendar}
                     value={fechaProgramada}
                     onChange={(e) => setFechaProgramada(e.target.value)}
-                    className="w-full bg-[#0B1220] border border-[#1F2937] rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-amber-500"
-                    required
                   />
                 </div>
-              </div>
 
-              {/* Descripción del Servicio */}
-              <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                  Descripción Detallada de los Trabajos *
-                </label>
-                <textarea
+                <FormTextarea
+                  label="Descripción Detallada de los Trabajos"
+                  required
                   rows={2}
                   value={descripcion}
                   onChange={(e) => setDescripcion(e.target.value)}
                   placeholder="Detalle los repuestos a sustituir, fluidos y componentes inspeccionados..."
-                  className="w-full bg-[#0B1220] border border-[#1F2937] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                  required
                 />
-              </div>
+              </FormFieldset>
 
-              {/* Taller y Nombre */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Tipo de Taller *
-                  </label>
-                  <select
+              {/* Taller y Costos */}
+              <FormFieldset
+                title="3. Taller Asignado & Presupuesto"
+                description="Estimación de costos de mano de obra y repuestos"
+                icon={DollarSign}
+              >
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <FormSelect
+                    label="Tipo de Taller"
+                    required
+                    icon={Building}
                     value={taller}
                     onChange={(e) => {
                       const nuevoTaller = e.target.value as "propio" | "tercero";
@@ -385,121 +396,109 @@ export function ModalNuevoMantenimiento({
                         setNombreTaller("Scania Perú - Concesionario Huachipa");
                       }
                     }}
-                    className="w-full bg-[#0B1220] border border-[#1F2937] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
                   >
                     <option value="propio">Taller Propio</option>
                     <option value="tercero">Taller Externo / Concesionario</option>
-                  </select>
-                </div>
+                  </FormSelect>
 
-                <div className="md:col-span-2">
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Nombre del Taller / Sede *
-                  </label>
-                  <input
-                    type="text"
-                    value={nombreTaller}
-                    onChange={(e) => setNombreTaller(e.target.value)}
-                    placeholder="Ej: Scania Huachipa o Patio Callao"
-                    className="w-full bg-[#0B1220] border border-[#1F2937] rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Costos: Mano de Obra, Repuestos y Total */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Mano de Obra (S/)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={costoManoObra}
-                    onChange={(e) => setCostoManoObra(e.target.value)}
-                    className="w-full bg-[#0B1220] border border-[#1F2937] rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Repuestos / Insumos (S/)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={costoRepuestos}
-                    onChange={(e) => setCostoRepuestos(e.target.value)}
-                    className="w-full bg-[#0B1220] border border-[#1F2937] rounded-lg px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-amber-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                    Presupuesto Total (S/)
-                  </label>
-                  <div className="w-full bg-[#0B1220] border border-slate-700 rounded-lg px-3 py-2 text-xs text-amber-400 font-mono font-bold flex items-center justify-between">
-                    <span>S/ {totalCalculado}</span>
-                    <DollarSign className="h-3.5 w-3.5 text-slate-500" />
+                  <div className="md:col-span-2">
+                    <FormInput
+                      label="Nombre del Taller / Sede"
+                      required
+                      placeholder="Ej: Scania Huachipa o Patio Callao"
+                      value={nombreTaller}
+                      onChange={(e) => setNombreTaller(e.target.value)}
+                    />
                   </div>
                 </div>
-              </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+                  <FormInput
+                    label="Mano de Obra"
+                    type="number"
+                    step="0.01"
+                    suffix="PEN"
+                    value={costoManoObra}
+                    onChange={(e) => setCostoManoObra(e.target.value)}
+                  />
+
+                  <FormInput
+                    label="Repuestos / Insumos"
+                    type="number"
+                    step="0.01"
+                    suffix="PEN"
+                    value={costoRepuestos}
+                    onChange={(e) => setCostoRepuestos(e.target.value)}
+                  />
+
+                  <div className="space-y-1.5 text-xs w-full">
+                    <label className="block text-slate-300 font-semibold tracking-wide">
+                      Presupuesto Total
+                    </label>
+                    <div className="h-10 bg-[#0E1524] border border-amber-500/40 rounded-xl px-3.5 flex items-center justify-between text-amber-400 font-mono font-bold">
+                      <span>S/ {totalCalculado}</span>
+                      <DollarSign className="h-4 w-4 text-amber-500" />
+                    </div>
+                  </div>
+                </div>
+              </FormFieldset>
 
               {/* Estado Inicial de la OT */}
-              <div className="p-3 rounded-lg border border-slate-800 bg-slate-900/40 flex items-center justify-between">
+              <div className="p-4 rounded-xl border border-slate-800 bg-[#0B1220]/70 flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
-                  <span className="text-xs font-semibold text-slate-200 block">
+                  <span className="text-xs font-bold text-slate-200 block font-[family-name:var(--font-sora)]">
                     Estado de Apertura de la OT
                   </span>
                   <span className="text-[11px] text-slate-400">
                     {estado === "en_proceso"
-                      ? "La unidad pasará de inmediato al estado 'Mantenimiento' (No despachable)."
-                      : "La orden queda programada para su ejecución en la fecha agendada."}
+                      ? "⚠️ La unidad pasará de inmediato al estado 'Mantenimiento' (No despachable en viajes)."
+                      : "📅 La orden queda agendada para su ejecución en la fecha prevista."}
                   </span>
                 </div>
-                <select
-                  value={estado}
-                  onChange={(e) => setEstado(e.target.value as "pendiente" | "en_proceso")}
-                  className="bg-[#0B1220] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white font-semibold focus:outline-none focus:border-amber-500"
-                >
-                  <option value="pendiente">Programado (Pendiente)</option>
-                  <option value="en_proceso">En Taller Ahora (En Proceso)</option>
-                </select>
+                <div className="w-full md:w-56">
+                  <FormSelect
+                    value={estado}
+                    onChange={(e) => setEstado(e.target.value as "pendiente" | "en_proceso")}
+                  >
+                    <option value="pendiente">Programado (Pendiente)</option>
+                    <option value="en_proceso">En Taller Ahora (En Proceso)</option>
+                  </FormSelect>
+                </div>
               </div>
 
-              {/* Botones de acción */}
-              <div className="pt-3 border-t border-[#1F2937] flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  disabled={loading}
-                  className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 text-xs font-bold flex items-center gap-2 transition-colors shadow-lg shadow-amber-500/10"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Generando orden...</span>
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle2 className="h-4 w-4" />
-                      <span>Crear Orden de Trabajo</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+
+            {/* Botones de acción */}
+            <SheetFooter className="p-4 bg-[#0B1220] border-t border-[#1F2937] flex flex-row items-center justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                disabled={loading}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 text-xs font-bold flex items-center gap-2 transition-colors shadow-lg shadow-amber-500/10"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Generando orden...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Crear Orden de Trabajo</span>
+                  </>
+                )}
+              </button>
+            </SheetFooter>
+          </form>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

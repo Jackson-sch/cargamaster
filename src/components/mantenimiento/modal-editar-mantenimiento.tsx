@@ -2,9 +2,33 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Edit2, X, Wrench, Loader2 } from "lucide-react";
+import {
+  Edit2,
+  Wrench,
+  Loader2,
+  Calendar,
+  DollarSign,
+  Truck,
+  Building,
+  Gauge,
+  FileText,
+} from "lucide-react";
 import { actualizarMantenimientoAction } from "@/lib/actions/mantenimiento";
 import { toast } from "sonner";
+import {
+  FormFieldset,
+  FormSelect,
+  FormInput,
+  FormTextarea,
+} from "@/components/ui/form-controls";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/components/ui/sheet";
 
 export interface MantenimientoItemForEdit {
   id: string;
@@ -59,7 +83,9 @@ export function ModalEditarMantenimiento({
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     if (!formData.descripcion.trim()) {
       toast.error("La descripción del servicio es obligatoria.");
       return;
@@ -106,218 +132,193 @@ export function ModalEditarMantenimiento({
         <Edit2 className="h-3.5 w-3.5" />
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div
-            className="w-full max-w-lg bg-[#111827] border border-[#1F2937] rounded-xl shadow-2xl overflow-hidden text-left"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                handleSubmit();
-              }
-            }}
-          >
-            {/* Header */}
-            <div className="p-4 bg-[#0E1524] border-b border-[#1F2937] flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Wrench className="h-5 w-5 text-amber-400" />
-                <div>
-                  <h2 className="text-sm font-bold text-white font-[family-name:var(--font-sora)]">
-                    Editar Orden de Trabajo ({mantenimiento.placa})
-                  </h2>
-                  <p className="text-[11px] text-slate-400">
-                    Modificación de rutina técnica y presupuesto operativo
-                  </p>
-                </div>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-xl md:max-w-2xl bg-[#0E1524] border-l border-[#1F2937] p-0 flex flex-col h-full shadow-2xl text-slate-100"
+        >
+          {/* Header */}
+          <SheetHeader className="p-5 bg-[#0B1220] border-b border-[#1F2937] shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
+                <Wrench className="h-5 w-5" />
               </div>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-md transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
+              <div>
+                <SheetTitle className="text-base font-bold text-white font-[family-name:var(--font-sora)] flex items-center gap-2">
+                  Editar Orden de Trabajo
+                  <span className="font-mono text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded text-xs border border-amber-400/20">
+                    {mantenimiento.placa}
+                  </span>
+                </SheetTitle>
+                <SheetDescription className="text-xs text-slate-400 mt-0.5">
+                  Modificación de rutina técnica y presupuesto operativo
+                </SheetDescription>
+              </div>
             </div>
+          </SheetHeader>
 
-            {/* Body */}
-            <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-300 font-medium mb-1">
-                    Tipo de Mantenimiento *
-                  </label>
-                  <select
+          {/* Form Content */}
+          <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+            <div className="p-6 space-y-5 overflow-y-auto custom-scrollbar flex-1">
+              <FormFieldset
+                title="1. Rutina Técnica & Programación"
+                description="Clasificación de servicio y fecha programada de ingreso"
+                icon={Wrench}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <FormSelect
+                    label="Tipo de Mantenimiento"
+                    required
                     value={formData.tipo}
                     onChange={(e) =>
                       setFormData({ ...formData, tipo: e.target.value as any })
                     }
-                    className="w-full h-9 bg-[#0B1220] border border-[#1F2937] rounded px-3 text-white focus:border-amber-500 focus:outline-none"
                   >
                     <option value="preventivo">Preventivo (Programado)</option>
-                    <option value="correctivo">Correctivo (Avería)</option>
-                  </select>
-                </div>
+                    <option value="correctivo">Correctivo (Avería / Auxilio)</option>
+                  </FormSelect>
 
-                <div>
-                  <label className="block text-slate-300 font-medium mb-1">
-                    Fecha Programada *
-                  </label>
-                  <input
-                    type="date"
+                  <FormInput
+                    label="Fecha Programada"
                     required
+                    type="date"
+                    icon={Calendar}
                     value={formData.fechaProgramada}
                     onChange={(e) =>
                       setFormData({ ...formData, fechaProgramada: e.target.value })
                     }
-                    className="w-full h-9 bg-[#0B1220] border border-[#1F2937] rounded px-3 text-white font-mono focus:border-amber-500 focus:outline-none"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-slate-300 font-medium mb-1">
-                  Descripción del Servicio / Rutina *
-                </label>
-                <textarea
+                <FormTextarea
+                  label="Descripción del Servicio / Rutina"
                   required
                   rows={3}
+                  placeholder="Detalle de actividades preventivas o correctivas a realizar..."
                   value={formData.descripcion}
                   onChange={(e) =>
                     setFormData({ ...formData, descripcion: e.target.value })
                   }
-                  className="w-full bg-[#0B1220] border border-[#1F2937] rounded p-2.5 text-white focus:border-amber-500 focus:outline-none resize-none"
                 />
-              </div>
+              </FormFieldset>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-300 font-medium mb-1">
-                    Tipo de Taller *
-                  </label>
-                  <select
+              <FormFieldset
+                title="2. Ubicación & Taller Autorizado"
+                description="Sede de intervención y kilometraje de ingreso"
+                icon={Building}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <FormSelect
+                    label="Tipo de Taller"
+                    required
                     value={formData.taller}
                     onChange={(e) =>
                       setFormData({ ...formData, taller: e.target.value as any })
                     }
-                    className="w-full h-9 bg-[#0B1220] border border-[#1F2937] rounded px-3 text-white focus:border-amber-500 focus:outline-none"
                   >
-                    <option value="propio">Taller Propio</option>
-                    <option value="tercero">Taller Tercero / Externo</option>
-                  </select>
-                </div>
+                    <option value="propio">Taller Propio / Base Principal</option>
+                    <option value="tercero">Taller Tercero / Concesionario Homologado</option>
+                  </FormSelect>
 
-                <div>
-                  <label className="block text-slate-300 font-medium mb-1">
-                    Nombre del Taller / Sede *
-                  </label>
-                  <input
-                    type="text"
+                  <FormInput
+                    label="Nombre del Taller / Sede"
                     required
+                    placeholder="Ej. Taller Central Lurín / Divemotor"
                     value={formData.nombreTaller}
                     onChange={(e) =>
                       setFormData({ ...formData, nombreTaller: e.target.value })
                     }
-                    className="w-full h-9 bg-[#0B1220] border border-[#1F2937] rounded px-3 text-white focus:border-amber-500 focus:outline-none"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-slate-300 font-medium mb-1">
-                  Odómetro al Ingreso (Km)
-                </label>
-                <input
-                  type="number"
-                  placeholder="Ej. 185200"
-                  value={formData.odometroRegistro}
-                  onChange={(e) =>
-                    setFormData({ ...formData, odometroRegistro: e.target.value })
-                  }
-                  className="w-full h-9 bg-[#0B1220] border border-[#1F2937] rounded px-3 text-white font-mono focus:border-amber-500 focus:outline-none"
-                />
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <FormInput
+                    label="Odómetro al Ingreso"
+                    type="number"
+                    suffix="Km"
+                    icon={Gauge}
+                    placeholder="185200"
+                    value={formData.odometroRegistro}
+                    onChange={(e) =>
+                      setFormData({ ...formData, odometroRegistro: e.target.value })
+                    }
+                  />
 
-              {/* Financial breakdown */}
-              <div className="p-3 bg-[#0B1220] border border-[#1F2937] rounded-lg space-y-3">
-                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
-                  Presupuesto & Costos (Soles PEN)
-                </span>
-                <div className="grid grid-cols-3 gap-2">
+                  <FormInput
+                    label="Observaciones Técnicas"
+                    icon={FileText}
+                    placeholder="Garantía, repuestos, notas de taller..."
+                    value={formData.observaciones}
+                    onChange={(e) =>
+                      setFormData({ ...formData, observaciones: e.target.value })
+                    }
+                  />
+                </div>
+              </FormFieldset>
+
+              <FormFieldset
+                title="3. Presupuesto & Liquidación de Costos"
+                description="Desglose en Soles (PEN) para control contable y coste por kilómetro"
+                icon={DollarSign}
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <FormInput
+                    label="Mano de Obra (S/)"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    prefix="S/"
+                    value={formData.costoManoObra}
+                    onChange={(e) =>
+                      handleCostoChange("costoManoObra", parseFloat(e.target.value) || 0)
+                    }
+                  />
+
+                  <FormInput
+                    label="Repuestos & Insumos (S/)"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    prefix="S/"
+                    value={formData.costoRepuestos}
+                    onChange={(e) =>
+                      handleCostoChange("costoRepuestos", parseFloat(e.target.value) || 0)
+                    }
+                  />
+
                   <div>
-                    <label className="block text-slate-400 text-[10px] mb-1">Mano de Obra</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.costoManoObra}
-                      onChange={(e) =>
-                        handleCostoChange("costoManoObra", parseFloat(e.target.value) || 0)
-                      }
-                      className="w-full h-8 bg-[#111827] border border-[#1F2937] rounded px-2 text-white font-mono focus:border-amber-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-400 text-[10px] mb-1">Repuestos</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.costoRepuestos}
-                      onChange={(e) =>
-                        handleCostoChange("costoRepuestos", parseFloat(e.target.value) || 0)
-                      }
-                      className="w-full h-8 bg-[#111827] border border-[#1F2937] rounded px-2 text-white font-mono focus:border-amber-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-amber-400 font-bold text-[10px] mb-1">Total (S/)</label>
-                    <div className="h-8 bg-[#111827] border border-amber-500/40 rounded px-2 flex items-center font-mono font-bold text-amber-300">
+                    <label className="block text-xs font-medium text-amber-400 mb-1">
+                      Total Liquidado (S/)
+                    </label>
+                    <div className="h-10 px-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center font-mono font-bold text-amber-300 text-sm">
                       S/ {formData.costoTotal.toFixed(2)}
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-medium mb-1">
-                  Observaciones Técnicas
-                </label>
-                <input
-                  type="text"
-                  placeholder="Garantía, repuestos cambiados, etc."
-                  value={formData.observaciones}
-                  onChange={(e) =>
-                    setFormData({ ...formData, observaciones: e.target.value })
-                  }
-                  className="w-full h-9 bg-[#0B1220] border border-[#1F2937] rounded px-3 text-white focus:border-amber-500 focus:outline-none"
-                />
-              </div>
+              </FormFieldset>
             </div>
 
-            {/* Footer */}
-            <div className="p-4 border-t border-[#1F2937] bg-[#0E1524] flex items-center justify-end gap-2">
+            {/* Footer Buttons */}
+            <SheetFooter className="p-4 bg-[#0B1220] border-t border-[#1F2937] flex flex-row items-center justify-end gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="h-9 px-4 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
+                className="h-9 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
               >
                 Cancelar
               </button>
               <button
-                type="button"
-                onClick={handleSubmit}
+                type="submit"
                 disabled={loading}
-                className="h-9 px-5 rounded bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                className="h-9 px-5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-colors disabled:opacity-50"
               >
                 {loading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 <span>Guardar Cambios</span>
               </button>
-            </div>
-          </div>
-        </div>
-      )}
+            </SheetFooter>
+          </form>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }
